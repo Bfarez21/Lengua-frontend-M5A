@@ -1,6 +1,5 @@
-"use client";
-import {Image} from "react/image";
-import Link from "react-router-dom";
+import React from "react";
+import { Link } from "react-router-dom"; // Asegúrate de que estás importando Link
 
 const Footer = () => {
     return (
@@ -11,14 +10,14 @@ const Footer = () => {
                         <div className="w-full px-4 md:w-1/2 lg:w-4/12 xl:w-5/12">
                             <div className="mb-12 max-w-[360px] lg:mb-16">
                                 <Link href="/" className="mb-8 inline-block">
-                                    <Image
+                                    <img
                                         src="/images/logo/logo-2.svg"
                                         alt="logo"
                                         className="w-full dark:hidden"
                                         width={140}
                                         height={30}
                                     />
-                                    <Image
+                                    <img
                                         src="/images/logo/logo.svg"
                                         alt="logo"
                                         className="hidden w-full dark:block"

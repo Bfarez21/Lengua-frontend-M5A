@@ -1,6 +1,5 @@
-import menuData from './menuData';
 
- menuData = [
+export const menuData = [
     {
         id: 1,
         title: "Home",
@@ -9,7 +8,7 @@ import menuData from './menuData';
     },
     {
         id: 2,
-        title: "About", 
+        title: "About",
         path: "/about",
         newTab: false,
     },
@@ -81,4 +80,5 @@ import menuData from './menuData';
         ],
     },
 ];
+
 export default menuData;

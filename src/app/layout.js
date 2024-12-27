@@ -2,32 +2,25 @@ import React from "react";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import ScrollToTop from "../components/ScrollToTop";
-import { Inter } from "next/font/google";
-import "node_modules/react-modal-video/css/modal-video.css";
-import "../styles/index.css";
-import { Providers } from "./providers";
+import { Providers } from "./providers"; // Si estás usando un contexto global
+import "../index.css"; // Asegúrate de que este archivo contenga los estilos necesarios
 
-const inter = Inter({ subsets: ["latin"] });
-
-export default function RootLayout({children}) {
+const RootLayout = ({ children }) => {
     return (
         <html suppressHydrationWarning lang="en">
-        {/*
-        <head /> will contain the components returned by the nearest parent
-        head.js. Find out more at https://beta.nextjs.org/docs/api-reference/file-conventions/head
-      */}
-        <head />
-
-        <body className={`bg-[#FCFCFC] dark:bg-black ${inter.className}`}>
+        <head>
+            {/* Agrega más metadatos aquí si es necesario */}
+        </head>
+        <body className="bg-[#FCFCFC] dark:bg-black font-sans">
         <Providers>
-            <Header />
-            {children}
-            <Footer />
-            <ScrollToTop />
+            <Header /> {/* Header global */}
+            <main>{children}</main> {/* El contenido específico de cada página */}
+            <Footer />  {/* Footer global */}
+            <ScrollToTop /> {/* Componente para manejar el scroll */}
         </Providers>
         </body>
         </html>
     );
-}
+};
 
-
+export default RootLayout;
