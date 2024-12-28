@@ -1,26 +1,28 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom"; // Asegúrate de que estás importando Link
-import { menuData } from "./menuData"; // Asegúrate de importar correctamente el archivo de menú
+import { Link } from "react-router-dom";
+import { menuData } from "./menuData";
 
 const Header = () => {
     const [navbarOpen, setNavbarOpen] = useState(false);
     const [sticky, setSticky] = useState(false);
     const [openIndex, setOpenIndex] = useState(-1);
+    const [darkMode, setDarkMode] = useState(false);
 
-    // Maneja la activación del menú hamburguesa
     const navbarToggleHandler = () => setNavbarOpen(!navbarOpen);
 
-    // Cambia la clase sticky al hacer scroll
     const handleStickyNavbar = () => {
         setSticky(window.scrollY >= 80);
     };
 
-    // Maneja el menú desplegable
     const handleSubmenu = (index) => {
         setOpenIndex(openIndex === index ? -1 : index);
     };
 
-    // Añadir el evento de scroll
+    const toggleTheme = () => {
+        setDarkMode(!darkMode);
+        document.documentElement.classList.toggle('dark');
+    };
+
     useEffect(() => {
         window.addEventListener("scroll", handleStickyNavbar);
         return () => window.removeEventListener("scroll", handleStickyNavbar);
@@ -28,103 +30,129 @@ const Header = () => {
 
     return (
         <header
-            className={`header left-0 top-0 z-40 w-full items-center ${
+            className={`header left-0 top-0 z-40 flex w-full items-center ${
                 sticky
-                    ? "dark:bg-gray-dark dark:shadow-sticky-dark fixed bg-white shadow-sticky backdrop-blur-sm transition-all"
+                    ? "dark:bg-gray-900 dark:shadow-md fixed z-[9999] bg-white !bg-opacity-80 shadow-md backdrop-blur-sm transition"
                     : "absolute bg-transparent"
             }`}
         >
             <div className="container mx-auto px-4">
-                <div className="relative flex items-center justify-between py-4">
-                    <div className="w-60 max-w-full">
-                        <Link
-                            to="/"
-                            className={`header-logo block w-full ${sticky ? "py-2" : "py-8"}`}
-                        >
+                <div className="relative -mx-4 flex items-center justify-between">
+                    {/* Logo */}
+                    <div className="flex items-center">
+                        <Link to="/" className="block py-5">
                             <img
                                 src="/images/logo/logo-2.svg"
                                 alt="logo"
-                                width={140}
-                                height={30}
-                                className="w-full dark:hidden"
+                                className="h-8 dark:hidden"
                             />
                             <img
                                 src="/images/logo/logo.svg"
                                 alt="logo"
-                                width={140}
-                                height={30}
-                                className="hidden w-full dark:block"
+                                className="hidden h-8 dark:block"
                             />
                         </Link>
                     </div>
-                    <div className="flex items-center justify-between w-full px-4">
-                        <button
-                            onClick={navbarToggleHandler}
-                            className="lg:hidden block absolute right-4 top-1/2 transform -translate-y-1/2"
-                            aria-label="Toggle Navigation"
-                        >
-                            <span
-                                className={`block w-8 h-0.5 bg-black transition-all duration-300 ${
-                                    navbarOpen ? "rotate-45" : ""
+                    <div className="flex w-full items-center justify-between px-4">
+                        <div>
+                            <button
+                                onClick={navbarToggleHandler}
+                                aria-label="Mobile Menu"
+                                className="absolute right-4 top-1/2 block translate-y-[-50%] rounded-lg px-3 py-[6px] ring-primary focus:ring-2 lg:hidden"
+                            >
+                <span
+                    className={`relative my-1.5 block h-0.5 w-[30px] bg-black transition-all duration-300 dark:bg-white ${
+                        navbarOpen ? "top-[7px] rotate-45" : ""
+                    }`}
+                />
+                                <span
+                                    className={`relative my-1.5 block h-0.5 w-[30px] bg-black transition-all duration-300 dark:bg-white ${
+                                        navbarOpen ? "opacity-0" : ""
+                                    }`}
+                                />
+                                <span
+                                    className={`relative my-1.5 block h-0.5 w-[30px] bg-black transition-all duration-300 dark:bg-white ${
+                                        navbarOpen ? "top-[-8px] -rotate-45" : ""
+                                    }`}
+                                />
+                            </button>
+                            <nav
+                                className={`navbar absolute right-0 z-30 w-[250px] rounded border-[.5px] border-gray-200 bg-white px-6 py-4 duration-300 dark:border-gray-700 dark:bg-gray-900 lg:visible lg:static lg:w-auto lg:border-none lg:!bg-transparent lg:p-0 lg:opacity-100 ${
+                                    navbarOpen
+                                        ? "visibility top-full opacity-100"
+                                        : "invisible top-[120%] opacity-0"
                                 }`}
-                            ></span>
-                            <span
-                                className={`block w-8 h-0.5 bg-black transition-all duration-300 ${
-                                    navbarOpen ? "opacity-0" : ""
-                                }`}
-                            ></span>
-                            <span
-                                className={`block w-8 h-0.5 bg-black transition-all duration-300 ${
-                                    navbarOpen ? "-rotate-45" : ""
-                                }`}
-                            ></span>
-                        </button>
-
-                        {/* Menú de navegación */}
-                        <nav
-                            className={`absolute right-0 top-full w-[250px] bg-white px-6 py-4 lg:static lg:w-auto lg:bg-transparent ${
-                                navbarOpen ? "block" : "hidden"
-                            }`}
-                        >
-                            <ul className="lg:flex lg:space-x-12 lg:items-center">
-                                {menuData.map((item, index) => (
-                                    <li key={item.id}>
-                                        {/* Si tiene submenu, manejarlo */}
-                                        {item.submenu ? (
-                                            <>
-                                                <p
-                                                    onClick={() => handleSubmenu(index)}
-                                                    className="py-2 text-dark hover:text-primary cursor-pointer"
+                            >
+                                <ul className="block lg:flex lg:space-x-12">
+                                    {menuData.map((menuItem, index) => (
+                                        <li key={index} className="group relative">
+                                            {menuItem.path ? (
+                                                <a
+                                                    href={menuItem.path}
+                                                    className={`flex py-2 text-base lg:mr-0 lg:inline-flex lg:px-0 lg:py-6 
+                            text-gray-900 hover:text-blue-600 dark:text-gray-200 dark:hover:text-white`}
                                                 >
-                                                    {item.title}
-                                                </p>
-                                                {openIndex === index && (
-                                                    <ul className="pl-4">
-                                                        {item.submenu.map((subItem) => (
-                                                            <li key={subItem.id}>
-                                                                <Link
-                                                                    to={subItem.path}
-                                                                    className="block py-1 text-dark hover:text-primary"
-                                                                >
-                                                                    {subItem.title}
-                                                                </Link>
-                                                            </li>
+                                                    {menuItem.title}
+                                                </a>
+                                            ) : (
+                                                <>
+                                                    <p
+                                                        onClick={() => handleSubmenu(index)}
+                                                        className="flex cursor-pointer items-center justify-between py-2 text-base text-gray-900 group-hover:text-blue-600 dark:text-gray-200 dark:hover:text-white lg:mr-0 lg:inline-flex lg:px-0 lg:py-6"
+                                                    >
+                                                        {menuItem.title}
+                                                        <span className="pl-3">
+                              <svg width="25" height="24" viewBox="0 0 25 24">
+                                <path
+                                    fillRule="evenodd"
+                                    clipRule="evenodd"
+                                    d="M6.29289 8.8427C6.68342 8.45217 7.31658 8.45217 7.70711 8.8427L12 13.1356L16.2929 8.8427C16.6834 8.45217 17.3166 8.45217 17.7071 8.8427C18.0976 9.23322 18.0976 9.86639 17.7071 10.2569L12 15.964L6.29289 10.2569C5.90237 9.86639 5.90237 9.23322 6.29289 8.8427Z"
+                                    fill="currentColor"
+                                />
+                              </svg>
+                            </span>
+                                                    </p>
+                                                    <div
+                                                        className={`submenu relative left-0 top-full rounded-sm bg-white transition-[top] duration-300 group-hover:opacity-100 dark:bg-gray-900 lg:invisible lg:absolute lg:top-[110%] lg:block lg:w-[250px] lg:p-4 lg:opacity-0 lg:shadow-lg lg:group-hover:visible lg:group-hover:top-full ${
+                                                            openIndex === index ? "block" : "hidden"
+                                                        }`}
+                                                    >
+                                                        {menuItem.submenu.map((submenuItem, index) => (
+                                                            <a
+                                                                href={submenuItem.path}
+                                                                key={index}
+                                                                className="block rounded py-2.5 text-sm text-gray-900 hover:text-blue-600 dark:text-gray-200 dark:hover:text-white lg:px-3"
+                                                            >
+                                                                {submenuItem.title}
+                                                            </a>
                                                         ))}
-                                                    </ul>
-                                                )}
-                                            </>
-                                        ) : (
-                                            <Link
-                                                to={item.path || "#"}
-                                                className="py-2 text-dark hover:text-primary"
-                                            >
-                                                {item.title}
-                                            </Link>
-                                        )}
-                                    </li>
-                                ))}
-                            </ul>
-                        </nav>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </nav>
+                        </div>
+                        <div className="flex items-center justify-end pr-16 lg:pr-0">
+                            <a
+                                href="/signin"
+                                className="hidden px-7 py-3 text-base font-medium text-gray-900 hover:opacity-70 dark:text-white md:block"
+                            >
+                                Sign In
+                            </a>
+                            <a
+                                href="/signup"
+                                className="ease-in-up hidden rounded-sm bg-blue-600 px-8 py-3 text-base font-medium text-white transition duration-300 hover:bg-opacity-90 md:block md:px-9 lg:px-6 xl:px-9"
+                            >
+                                Sign Up
+                            </a>
+                            <button
+                                onClick={toggleTheme}
+                                className="flex h-8 w-8 items-center justify-center rounded-md text-gray-900 dark:text-white"
+                            >
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

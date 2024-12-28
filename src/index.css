@@ -30,4 +30,11 @@
     input#checkboxLabel:checked ~ .box span {
         @apply opacity-100;
     }
+    .text-dark {
+        @apply text-gray-900;
+    }
+
+    .text-primary {
+        @apply text-blue-600;
+    }
 }
