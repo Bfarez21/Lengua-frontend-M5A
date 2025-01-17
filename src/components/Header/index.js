@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom"; // Importar useLocation
 import { menuData } from "./menuData";
 import ThemeToggler from "./ThemeToggler";
+//import {theme} from "../../../tailwind.config";
 
 const Header = () => {
     const [navbarOpen, setNavbarOpen] = useState(false);
@@ -50,14 +51,14 @@ const Header = () => {
                     <div className="flex items-center">
                         <Link to="/" className="block py-5">
                             <img
-                                src="/images/logo/logo-2.svg"
+                                src="/images/logo/logoSpeak.png"
                                 alt="logo"
-                                className="h-8 dark:hidden"
+                                className="h-16 dark:hidden"
                             />
                             <img
-                                src="/images/logo/logo.svg"
+                                src="/images/logo/logoSpeak.png"
                                 alt="logo"
-                                className="hidden h-8 dark:block"
+                                className="hidden h-10 dark:block"
                             />
                         </Link>
                     </div>
@@ -163,8 +164,9 @@ const Header = () => {
                                 Sign Up
                             </Link>
                             <div>
-                                <ThemeToggler />
+                                <ThemeToggler/>
                             </div>
+
                         </div>
                     </div>
                 </div>

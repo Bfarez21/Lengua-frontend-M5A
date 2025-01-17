@@ -9,8 +9,8 @@ const Video = () => {
         <section className="relative z-10 py-16 md:py-20 lg:py-28">
             <div className="container">
                 <SectionTitle
-                    title="We are ready to help"
-                    paragraph="There are many variations of passages of Lorem Ipsum available but the majority have suffered alteration in some form."
+                    title="Video tutorial"
+                    paragraph="Como usar nuestra aplicación."
                     center
                     mb="80px"
                 />
@@ -24,7 +24,7 @@ const Video = () => {
                             <div className="relative aspect-[77/40] items-center justify-center">
                                 {/* Usamos ReactPlayer en lugar de un botón para abrir un modal */}
                                 <ReactPlayer
-                                    url="https://www.youtube.com/watch?v=L61p2uyiMSo" // URL del video
+                                    url="https://www.youtube.com/watch?v=TiebZllW8As" // URL del video
                                     playing={isPlaying} // Controla si el video está reproduciéndose
                                     width="100%" // Ancho del video
                                     height="100%" // Alto del video
