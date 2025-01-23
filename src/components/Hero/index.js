@@ -1,9 +1,21 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useNavigate, Route } from 'react-router-dom';
+
 import {Pagination} from "@mui/material";
 import ImageCarousel from "./Imagenes";
+import CameraComponent from "../camera/CameraComponent";
+
+
 
 const Hero = () => {
+    const navigate = useNavigate();
+    const handleActivateCamera = () => {
+        // Lógica para activar la cámara
+     navigate("/camaraDetecter")
+        console.log("Cámara activada");
+        alert("Cámara activada");
+    };
     return (
         <>
             <section
@@ -36,6 +48,14 @@ const Hero = () => {
                                         className="inline-block rounded-sm bg-black px-8 py-4 text-base font-semibold text-white duration-300 ease-in-out hover:bg-black/90 dark:bg-white/10 dark:text-white dark:hover:bg-white/5"
                                     >
                                         Star on GitHub
+                                    </Link>
+                                    {/* dirige a page  cámara */}
+                                    <Link
+                                      to="/camaraDetecter"
+                                     // onClick={handleActivateCamera}
+                                      className="rounded-sm bg-green-500 px-8 py-4 text-base font-semibold text-white duration-300 ease-in-out hover:bg-green-600"
+                                    >
+                                        📸 Activar Cámara
                                     </Link>
                                 </div>
                                 <div>
