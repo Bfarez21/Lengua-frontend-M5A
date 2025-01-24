@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import * as tf from '@tensorflow/tfjs'; // TensorFlow.js
+
 
 const CameraComponent = () => {
   const videoRef = useRef(null); // Referencia al video
@@ -7,6 +8,14 @@ const CameraComponent = () => {
   const [text, setText] = useState(""); // Estado para el texto del textarea
   const [model, setModel] = useState(null); // Guardar el modelo
   const [labelEncoder, setLabelEncoder] = useState(null); // Guardar el codificador de etiquetas
+  const [predictions, setPredictions] = useState([]);
+
+  // texto a audio
+  const speakText=(text)=>{
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'es-ES'; // español
+    window.speechSynthesis.speak(utterance);
+  }
 
   useEffect(() => {
     const loadModel = async () => {
@@ -57,25 +66,53 @@ const CameraComponent = () => {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
 
-      // Dibujar el fotograma del video en el canvas
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(video,
+        video.videoWidth * 0.25,
+        video.videoHeight * 0.2,
+        video.videoWidth * 0.5,
+        video.videoHeight * 0.6,
+        0, 0, canvas.width, canvas.height
+      );
 
-      // Convertir el contenido del canvas en un tensor
       const frame = tf.browser.fromPixels(canvas);
 
-      // Preprocesar el tensor
-      const processedFrame = frame.resizeNearestNeighbor([224, 224]) // Redimensionar al tamaño esperado
-        .expandDims(0) // Añadir dimensión de batch
+      const processedFrame = frame
+        .resizeBilinear([224, 224])
+        .expandDims(0)
         .toFloat()
-        .div(tf.scalar(255)); // Normalizar
+        .div(tf.scalar(255))
+        .sub(tf.scalar(0.5))
+        .div(tf.scalar(0.5));
 
-      // Realizar la predicción
       const prediction = model.predict(processedFrame);
+      const predictedClassIndex = prediction.argMax(1).dataSync()[0];
+      const predictedClass = labelEncoder[predictedClassIndex];
 
-      // Obtener la clase predicha y convertirla a texto
-      const predictedClass = labelEncoder[prediction.argMax(1).dataSync()[0]];
-      setText(predictedClass); // Mostrar la predicción en el textarea
-      console.log("Predicción:", predictedClass);
+      // Suavizado de predicciones
+      setPredictions(prev => {
+        const newPredictions = [...prev, predictedClass];
+        if (newPredictions.length > 5) newPredictions.shift();
+
+        const mostFrequent = newPredictions.reduce((a, b) =>
+          newPredictions.filter(v => v === a).length >= newPredictions.filter(v => v === b).length ? a : b
+        );
+
+        // Solo reproducir audio si la predicción más frecuente es diferente al texto actual
+        if (mostFrequent !== text) {
+          const utterance = new SpeechSynthesisUtterance(mostFrequent);
+          utterance.lang = 'es-ES'; //audio español
+          //window.speechSynthesis.speak(utterance);  //reproduce el audio
+        }
+
+        setText(mostFrequent);
+        console.log(mostFrequent);
+        return newPredictions;
+      });
+
+      // Limpiar recursos
+      frame.dispose();
+      processedFrame.dispose();
+      prediction.dispose();
     }
   };
 
@@ -99,7 +136,7 @@ const CameraComponent = () => {
       <div style={styles.textareaContainer}>
         <textarea
           value={text}
-          placeholder="Escribe aquí..."
+          placeholder="Mostrar aquí..."
           style={styles.textarea}
           readOnly
         />
@@ -140,7 +177,7 @@ const styles = {
     width: '100%',
     height: '300px',
     padding: '10px',
-    fontSize: '16px',
+    fontSize: '35px',
     borderRadius: '8px',
     border: '1px solid #ccc',
   },
