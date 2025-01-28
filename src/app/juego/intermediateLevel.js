@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-
+import { Link } from "react-router-dom";
+import { API_URL } from "../../config";
 const IntermediateLevel = () => {
   const [currentGreeting, setCurrentGreeting] = useState(null);
   const [feedback, setFeedback] = useState("");
@@ -13,7 +14,7 @@ const IntermediateLevel = () => {
   // Obtener los saludos desde la API
   const fetchGreetings = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/gifs/saludos");
+      const response = await fetch(`${API_URL}/gifs/saludos`);
       const data = await response.json();
       const mappedGreetings = data.map(item => ({
         greeting: item.nombre,
@@ -131,12 +132,20 @@ const IntermediateLevel = () => {
           </div>
         ) : (
           <div className="text-center">
-            <button
-              onClick={restartGame}
-              className="py-2 px-6 bg-indigo-700 text-white font-bold rounded-lg shadow hover:bg-indigo-800 transition"
-            >
-              Reiniciar Juego
-            </button>
+            <Link
+              //onAuxClick={restartGame}
+              to="/jugar"
+              className="bg-indigo-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-600">
+
+              Finalizar juego
+            </Link>
+            <Link
+              onAuxClick={restartGame}
+              to="/jugar/NivelMedio"
+              className="bg-indigo-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-600">
+
+              Reiniciar juego
+            </Link>
           </div>
         )}
 

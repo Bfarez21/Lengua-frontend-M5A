@@ -25,7 +25,7 @@ const ThemeToggler = () => {
                     viewBox="0 0 25 24"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
-                    className="w-5 h-5 md:w-6 md:h-6 pointer-events-none"
+                    className="w-5 h-5 md:w-6 md:h-6 "
                 >
 
                     <mask id="path-1-inside-1_977:1934" fill="white">
@@ -44,7 +44,7 @@ const ThemeToggler = () => {
                 <svg
                     viewBox="0 0 23 23"
                     fill="none"
-                    className="w-5 h-5 md:w-6 md:h-6 pointer-events-none"
+                    className="w-5 h-5 md:w-6 md:h-6 "
                 >
                     <mask id="path-1-inside-1_977:1934" fill="white">
                         <path

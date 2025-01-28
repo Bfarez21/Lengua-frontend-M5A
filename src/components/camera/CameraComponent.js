@@ -1,70 +1,117 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-import * as tf from '@tensorflow/tfjs'; // TensorFlow.js
-
+import { useEffect, useRef, useState } from 'react';
+import * as tf from '@tensorflow/tfjs';
 
 const CameraComponent = () => {
-  const videoRef = useRef(null); // Referencia al video
-  const canvasRef = useRef(null); // Referencia al canvas
-  const [text, setText] = useState(""); // Estado para el texto del textarea
-  const [model, setModel] = useState(null); // Guardar el modelo
-  const [labelEncoder, setLabelEncoder] = useState(null); // Guardar el codificador de etiquetas
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const [text, setText] = useState("");
+  const [model, setModel] = useState(null);
+  const [labelEncoder, setLabelEncoder] = useState(null);
   const [predictions, setPredictions] = useState([]);
 
-  // texto a audio
-  const speakText=(text)=>{
+  const speakText = (text) => {
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'es-ES'; // español
+    utterance.lang = 'es-ES';
     window.speechSynthesis.speak(utterance);
-  }
+  };
 
-  useEffect(() => {
-    const loadModel = async () => {
-      try {
-        const model = await tf.loadLayersModel('/model.json'); // Cargar el modelo
-        const labelEncoder = await fetch('/metadata.json') // Cargar las etiquetas desde JSON
-          .then(res => res.json());
+  const loadModel = async () => {
+    try {
+      console.log("Iniciando carga del modelo...");
 
-        // accedo a las etiquetas
-        const labels = labelEncoder.labels;
-
-        setModel(model); // Guardar el modelo
-        setLabelEncoder(labels); // Guardar las etiquetas
-
-        console.log("Modelo y etiquetas cargados correctamente");
-      } catch (error) {
-        console.error("Error al cargar el modelo o etiquetas:", error);
+      // 1. Solicitar datos del modelo desde la API
+      const response = await fetch("http://localhost:8000/api/modelo/");
+      if (!response.ok) {
+        throw new Error(`Error al obtener datos del modelo: ${response.statusText}`);
       }
-    };
 
-    const activarCamara = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream; // Asignar el stream al elemento de video
+      const modeloData = await response.json();
+      if (!modeloData || modeloData.length === 0) {
+        throw new Error("No se encontraron datos del modelo en la API");
+      }
+
+      // 2. Obtener URLs de los archivos necesarios
+      const modeloInfo = modeloData[0];
+      const { model_file, weights_file, metadata_file } = modeloInfo;
+
+      console.log("URLs recibidas:", { model_file, weights_file, metadata_file });
+
+      // 3. Verificar accesibilidad de los archivos
+      const checkFileAccessibility = async (url, fileType) => {
+        const res = await fetch(url);
+        if (!res.ok) {
+          throw new Error(`No se pudo acceder al archivo ${fileType}: ${res.statusText}`);
         }
-      } catch (error) {
-        console.error("Error al activar la cámara: ", error);
-        alert("No se pudo activar la cámara.");
-      }
-    };
+        console.log(`Archivo ${fileType} accesible`);
+        return res;
+      };
 
-    loadModel(); // Cargar el modelo al iniciar
-    activarCamara(); // Activar la cámara al iniciar
+      await checkFileAccessibility(model_file, "model_file");
+      await checkFileAccessibility(weights_file, "weights_file");
+      await checkFileAccessibility(metadata_file, "metadata_file");
 
-    return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject;
-        const tracks = stream.getTracks();
-        tracks.forEach(track => track.stop());
+      // 4. Extraer el prefijo de la ruta para los pesos
+      const weightPathPrefix = weights_file.substring(0, weights_file.lastIndexOf("/") + 1);
+      console.log("Prefijo para los pesos:", weightPathPrefix);
+
+      // 5. Cargar el modelo usando TensorFlow.js
+      const loadedModel = await tf.loadLayersModel(model_file, {
+        weightPathPrefix, // Usar prefijo para evitar problemas con las rutas
+      });
+
+      console.log("Modelo cargado exitosamente:", loadedModel.summary());
+
+      // 6. Cargar el archivo de metadata
+      const metadataResponse = await fetch(metadata_file);
+      if (!metadataResponse.ok) {
+        throw new Error(`No se pudo acceder al archivo metadata: ${metadataResponse.statusText}`);
       }
-    };
-  }, []);
+      const metadata = await metadataResponse.json();
+
+      if (!metadata || !metadata.labels) {
+        throw new Error("El archivo de metadata no tiene el formato esperado");
+      }
+      console.log("Metadata cargada:", metadata);
+
+      // 7. Guardar modelo y etiquetas en el estado
+      setModel(loadedModel);
+      setLabelEncoder(metadata.labels);
+      console.log("Modelo y etiquetas cargados exitosamente");
+    } catch (error) {
+      console.error("Error detallado:", {
+        message: error.message,
+        stack: error.stack,
+      });
+    }
+  };
+
+
+
+
+  const activarCamara = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (error) {
+      console.error("Error al activar la cámara: ", error);
+      alert("No se pudo activar la cámara.");
+    }
+  };
 
   const detectSignLanguage = async () => {
-    if (model && labelEncoder) {
+    if (!model || !labelEncoder || !videoRef.current || !canvasRef.current) return;
+
+    try {
       const video = videoRef.current;
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
+
+      // Verificar que el video esté reproduciendo
+      if (video.readyState !== video.HAVE_ENOUGH_DATA) {
+        return;
+      }
 
       ctx.drawImage(video,
         video.videoWidth * 0.25,
@@ -74,65 +121,79 @@ const CameraComponent = () => {
         0, 0, canvas.width, canvas.height
       );
 
-      const frame = tf.browser.fromPixels(canvas);
+      let frame = null;
+      let processedFrame = null;
+      let prediction = null;
 
-      const processedFrame = frame
-        .resizeBilinear([224, 224])
-        .expandDims(0)
-        .toFloat()
-        .div(tf.scalar(255))
-        .sub(tf.scalar(0.5))
-        .div(tf.scalar(0.5));
+      try {
+        frame = tf.browser.fromPixels(canvas);
+        processedFrame = frame
+          .resizeBilinear([224, 224])
+          .expandDims(0)
+          .toFloat()
+          .div(tf.scalar(255))
+          .sub(tf.scalar(0.5))
+          .div(tf.scalar(0.5));
 
-      const prediction = model.predict(processedFrame);
-      const predictedClassIndex = prediction.argMax(1).dataSync()[0];
-      const predictedClass = labelEncoder[predictedClassIndex];
+        prediction = model.predict(processedFrame);
+        const predictedClassIndex = prediction.argMax(1).dataSync()[0];
+        const predictedClass = labelEncoder[predictedClassIndex];
 
-      // Suavizado de predicciones
-      setPredictions(prev => {
-        const newPredictions = [...prev, predictedClass];
-        if (newPredictions.length > 5) newPredictions.shift();
+        setPredictions(prev => {
+          const newPredictions = [...prev, predictedClass];
+          if (newPredictions.length > 5) newPredictions.shift();
 
-        const mostFrequent = newPredictions.reduce((a, b) =>
-          newPredictions.filter(v => v === a).length >= newPredictions.filter(v => v === b).length ? a : b
-        );
+          const mostFrequent = newPredictions.reduce((a, b) =>
+            newPredictions.filter(v => v === a).length >= newPredictions.filter(v => v === b).length ? a : b
+          );
 
-        // Solo reproducir audio si la predicción más frecuente es diferente al texto actual
-        if (mostFrequent !== text) {
-          const utterance = new SpeechSynthesisUtterance(mostFrequent);
-          utterance.lang = 'es-ES'; //audio español
-          //window.speechSynthesis.speak(utterance);  //reproduce el audio
-        }
+          if (mostFrequent !== text) {
+            setText(mostFrequent);
+           // speakText(mostFrequent);
+            console.log('Predicción:', mostFrequent);
+          }
 
-        setText(mostFrequent);
-        console.log(mostFrequent);
-        return newPredictions;
-      });
-
-      // Limpiar recursos
-      frame.dispose();
-      processedFrame.dispose();
-      prediction.dispose();
+          return newPredictions;
+        });
+      } finally {
+        // Limpiar recursos de TensorFlow
+        if (frame) frame.dispose();
+        if (processedFrame) processedFrame.dispose();
+        if (prediction) prediction.dispose();
+      }
+    } catch (error) {
+      console.error('Error en la detección:', error);
     }
   };
 
+  // Efecto para cargar el modelo y activar la cámara
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      detectSignLanguage(); // Detectar lengua de señas cada cierto tiempo
-    }, 100); // Detecta cada 100 ms
+    loadModel();
+    activarCamara();
 
-    return () => clearInterval(intervalId); // Limpiar el intervalo cuando el componente se desmonte
-  }, [model, labelEncoder]);
+    // Cleanup function
+    return () => {
+      if (videoRef.current && videoRef.current.srcObject) {
+        const tracks = videoRef.current.srcObject.getTracks();
+        tracks.forEach(track => track.stop());
+      }
+    };
+  }, []); // Solo se ejecuta al montar el componente
+
+  // Efecto para la detección continua
+  useEffect(() => {
+    if (!model || !labelEncoder) return;
+
+    const intervalId = setInterval(detectSignLanguage, 100);
+    return () => clearInterval(intervalId);
+  }, [model, labelEncoder, text]); // Dependencias actualizadas
 
   return (
     <div style={styles.container}>
-      {/* Componente de la cámara */}
       <div style={styles.cameraContainer}>
-        <video ref={videoRef} autoPlay muted style={styles.video} />
+        <video ref={videoRef} autoPlay muted playsInline style={styles.video} />
         <canvas ref={canvasRef} style={styles.canvas} width="224" height="224" />
       </div>
-
-      {/* Componente del textarea */}
       <div style={styles.textareaContainer}>
         <textarea
           value={text}
@@ -145,7 +206,6 @@ const CameraComponent = () => {
   );
 };
 
-// Estilos en línea
 const styles = {
   container: {
     display: 'flex',
@@ -168,7 +228,7 @@ const styles = {
     borderRadius: '8px',
   },
   canvas: {
-    display: 'none', // Mantener el canvas oculto
+    display: 'none',
   },
   textareaContainer: {
     width: '20%',

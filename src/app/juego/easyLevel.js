@@ -1,13 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom/client";
+import { Link, useNavigate } from "react-router-dom";
+import { API_URL } from "../../config";
+
 const EasyLevel = () => {
+
   const [currentSign, setCurrentSign] = useState(null);
   const [feedback, setFeedback] = useState("");
   const [score, setScore] = useState(0);
   const [attempts, setAttempts] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [signs, setSigns] = useState([]);
-
+  const navigate = useNavigate();
 
   /*const signs = [
     { sign: "A", image: "/images/gameEasyLevel/A_test.jpg" },
@@ -21,7 +25,7 @@ const EasyLevel = () => {
   // Obtener los datos de las señales desde la API
   const fetchSigns = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/gifs/");
+      const response = await fetch(`${API_URL}/gifs`);
       const data = await response.json();
       const mappedSigns = data.map(item => ({
         sign: item.nombre,
@@ -135,12 +139,20 @@ const EasyLevel = () => {
           </div>
         ) : (
           <div className="text-center">
-            <button
-              onClick={(e)=>restartGame}
-              className="py-2 px-6 bg-indigo-700 text-white font-bold rounded-lg shadow hover:bg-indigo-800 transition"
-            >
-              Reiniciar Juego
-            </button>
+            <Link
+              //onAuxClick={restartGame}
+              to="/jugar"
+              className="bg-indigo-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-600">
+
+              Finalizar juego
+            </Link>
+            <Link
+              onAuxClick={restartGame}
+              to="/jugar/NivelFacil"
+              className="bg-indigo-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-600">
+
+              Reiniciar juego
+            </Link>
           </div>
         )}
 
