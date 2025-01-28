@@ -1,6 +1,5 @@
 import React from "react";
-import Link from "react/link";
-
+import { Link } from 'react-router-dom';
 export const metadata = {
     title: "Sign In Page | Free Next.js Template for Startup and SaaS",
     description: "This is Sign In Page for Startup Nextjs Template",

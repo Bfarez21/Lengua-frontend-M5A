@@ -1,20 +1,37 @@
 import React, { useState, useEffect, useRef } from "react";
-
+import ReactDOM from "react-dom/client";
 const EasyLevel = () => {
   const [currentSign, setCurrentSign] = useState(null);
   const [feedback, setFeedback] = useState("");
   const [score, setScore] = useState(0);
   const [attempts, setAttempts] = useState(0);
   const [gameOver, setGameOver] = useState(false);
+  const [signs, setSigns] = useState([]);
 
-  const signs = [
+
+  /*const signs = [
     { sign: "A", image: "/images/gameEasyLevel/A_test.jpg" },
     { sign: "B", image: "/images/gameEasyLevel/B_test.jpg" },
     { sign: "1", image: "/images/gameEasyLevel/uno.jpg" },
     { sign: "2", image: "/images/gameEasyLevel/dos.jpg" },
-  ];
+  ];*/
 
   const buttonsRef = useRef([]);
+
+  // Obtener los datos de las señales desde la API
+  const fetchSigns = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/gifs/");
+      const data = await response.json();
+      const mappedSigns = data.map(item => ({
+        sign: item.nombre,
+        image: item.archivo
+      }));
+      setSigns(mappedSigns);
+    } catch (error) {
+      console.error("Error al obtener las señales:", error);
+    }
+  };
 
   const setRandomSign = () => {
     const randomSign = signs[Math.floor(Math.random() * signs.length)];
@@ -48,6 +65,14 @@ const EasyLevel = () => {
     setGameOver(false);
     setRandomSign();
   };
+
+  useEffect(() => {
+    fetchSigns();
+  }, []);
+
+  useEffect(() => {
+    setRandomSign();
+  }, [signs]);
 
   useEffect(() => {
     buttonsRef.current.forEach((button, index) => {

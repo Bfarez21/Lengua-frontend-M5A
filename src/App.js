@@ -10,6 +10,7 @@ import PlayPage from "./app/juego/playPage";
 import EasyLevel from "./app/juego/easyLevel";
 import IntermediateLevel from "./app/juego/intermediateLevel";
 import DifficultLevel from "./app/juego/difficultLevel";
+import SigninPage from "./app/signin/page";
 
 // Crear el contexto del tema
 export const ThemeContext = createContext({
@@ -49,6 +50,7 @@ const App = () => {
                 <Route path="/somos" element={<RootLayout><Somos /></RootLayout>} />
                 <Route path="/contact" element={<RootLayout><ContactPage /></RootLayout>} />
                 <Route path="/comentarios" element={<RootLayout><Testimonials /></RootLayout>} />
+                <Route path="/signin" element={<RootLayout><SigninPage /></RootLayout>} />
                 <Route path="/camaraDetecter" element={<RootLayout><CameraDetecter /></RootLayout>} />
                 <Route path="/jugar" element={<RootLayout>< PlayPage /></RootLayout>} />
                 <Route path="/jugar/NivelFacil" element={<RootLayout>< EasyLevel /></RootLayout>} />
