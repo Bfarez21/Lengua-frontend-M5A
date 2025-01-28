@@ -19,6 +19,12 @@ const IntermediateLevel = () => {
         greeting: item.nombre,
         image: item.archivo
       }));
+      // Agregar opción de respuesta quemada
+      const staticOption = {
+        greeting: "Uno",
+        //image: "https://via.placeholder.com/150",
+      };
+     // setGreetings([...mappedGreetings, staticOption]);
       setGreetings(mappedGreetings);
     } catch (error) {
       console.error("Error al obtener los saludos:", error);
@@ -92,10 +98,11 @@ const IntermediateLevel = () => {
         {/* Encabezado */}
         <div className="text-center text-white">
           <h1 className="mb-6 text-4xl font-extrabold sm:text-5xl md:text-6xl">
-            Juego Nivel Medio - SALUDOS
+            Adivina la Seña - Saludos
           </h1>
           <p className="mb-10 text-lg leading-relaxed sm:text-xl md:text-2xl max-w-3xl mx-auto">
-            A continuación tienes un saludo en pantalla, selecciona la opción correcta:
+            A continuación tienes una seña en pantalla, selecciona la respuesta
+            correspondiente de las siguientes opciones:
           </p>
         </div>
 
