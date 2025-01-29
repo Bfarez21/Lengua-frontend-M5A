@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import * as tf from '@tensorflow/tfjs';
+import { API_URL } from "../../config";
 
 const CameraComponent = () => {
   const videoRef = useRef(null);
@@ -20,7 +21,7 @@ const CameraComponent = () => {
       console.log("Iniciando carga del modelo...");
 
       // 1. Solicitar datos del modelo desde la API
-      const response = await fetch("http://localhost:8000/api/modelo/");
+      const response = await fetch(`${API_URL}/modelo`);
       if (!response.ok) {
         throw new Error(`Error al obtener datos del modelo: ${response.statusText}`);
       }
