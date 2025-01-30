@@ -9,6 +9,7 @@ const CameraComponent = () => {
   const [model, setModel] = useState(null);
   const [labelEncoder, setLabelEncoder] = useState(null);
   const [predictions, setPredictions] = useState([]);
+  const [isPoseModel, setIsPoseModel] = useState(false);  // Nuevo estado para detectar el modelo de poses
 
   const speakText = (text) => {
     const utterance = new SpeechSynthesisUtterance(text);
@@ -32,7 +33,7 @@ const CameraComponent = () => {
       }
 
       // 2. Obtener URLs de los archivos necesarios
-      const modeloInfo = modeloData[0];
+      const modeloInfo = modeloData[0]; // Cambia el índice a 1 para acceder al segundo modelo
       const { model_file, weights_file, metadata_file } = modeloInfo;
 
       console.log("URLs recibidas:", { model_file, weights_file, metadata_file });
@@ -74,7 +75,11 @@ const CameraComponent = () => {
       }
       console.log("Metadata cargada:", metadata);
 
-      // 7. Guardar modelo y etiquetas en el estado
+      // 7. Verificar si el modelo es para poses basado en 'packageName'
+      const isPose = metadata.packageName === "@teachablemachine/pose";  // Verificar si es un modelo de poses
+      setIsPoseModel(isPose);
+
+      // 8. Guardar modelo y etiquetas en el estado
       setModel(loadedModel);
       setLabelEncoder(metadata.labels);
       console.log("Modelo y etiquetas cargados exitosamente");
@@ -85,9 +90,6 @@ const CameraComponent = () => {
       });
     }
   };
-
-
-
 
   const activarCamara = async () => {
     try {
@@ -128,13 +130,25 @@ const CameraComponent = () => {
 
       try {
         frame = tf.browser.fromPixels(canvas);
-        processedFrame = frame
-          .resizeBilinear([224, 224])
-          .expandDims(0)
-          .toFloat()
-          .div(tf.scalar(255))
-          .sub(tf.scalar(0.5))
-          .div(tf.scalar(0.5));
+
+        // Usar la resolución adecuada según el tipo de modelo (letras o poses)
+        if (isPoseModel) {
+          processedFrame = frame
+            .resizeBilinear([257, 257])  // Resolución para poses
+            .expandDims(0)
+            .toFloat()
+            .div(tf.scalar(255))
+            .sub(tf.scalar(0.5))
+            .div(tf.scalar(0.5));
+        } else {
+          processedFrame = frame
+            .resizeBilinear([224, 224])  // Resolución para letras
+            .expandDims(0)
+            .toFloat()
+            .div(tf.scalar(255))
+            .sub(tf.scalar(0.5))
+            .div(tf.scalar(0.5));
+        }
 
         prediction = model.predict(processedFrame);
         const predictedClassIndex = prediction.argMax(1).dataSync()[0];
@@ -150,7 +164,7 @@ const CameraComponent = () => {
 
           if (mostFrequent !== text) {
             setText(mostFrequent);
-           // speakText(mostFrequent);
+            speakText(mostFrequent);
             console.log('Predicción:', mostFrequent);
           }
 
@@ -193,8 +207,15 @@ const CameraComponent = () => {
     <div style={styles.container}>
       <div style={styles.cameraContainer}>
         <video ref={videoRef} autoPlay muted playsInline style={styles.video} />
-        <canvas ref={canvasRef} style={styles.canvas} width="224" height="224" />
+        {/* Establecer dinámicamente el tamaño del canvas según el modelo */}
+        <canvas
+          ref={canvasRef}
+          style={styles.canvas}
+          width={isPoseModel ? 257 : 224}  // Cambiar a 257 si es modelo de poses, 224 si es modelo de imágenes
+          height={isPoseModel ? 257 : 224} // Lo mismo para la altura
+        />
       </div>
+
       <div style={styles.textareaContainer}>
         <textarea
           value={text}
@@ -209,14 +230,14 @@ const CameraComponent = () => {
 
 const styles = {
   container: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '20px',
-    gap: '20px',
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "20px",
+    gap: "20px"
   },
   cameraContainer: {
-    width: '80%',
+    width: "80%",
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
