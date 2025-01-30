@@ -24,12 +24,20 @@ export const ThemeContext = createContext({
 const CustomThemeProvider = ({ children }) => {
     const [theme, setTheme] = useState('dark');
 
-    // useEffect(() => {
-    //     // Cargar el tema inicial desde localStorage
-    //     const savedTheme = localStorage.getItem('theme') || 'dark';
-    //     setTheme(savedTheme);
-    //     document.documentElement.className = savedTheme;
-    // }, []);
+    useEffect(() => {
+        // Primero intentamos obtener el tema guardado
+        const savedTheme = localStorage.getItem('theme');
+
+        // Si no hay tema guardado, establecemos 'dark' como predeterminado
+        if (!savedTheme) {
+            localStorage.setItem('theme', 'dark');
+            document.documentElement.className = 'dark';
+        } else {
+            // Si hay un tema guardado, lo utilizamos
+            setTheme(savedTheme);
+            document.documentElement.className = savedTheme;
+        }
+    }, []);
 
     const handleTheme = (newTheme) => {
         setTheme(newTheme);
@@ -37,10 +45,15 @@ const CustomThemeProvider = ({ children }) => {
         document.documentElement.className = newTheme;
     };
 
+    // Aseguramos que el tema dark se aplique inmediatamente al montar el componente
+    useEffect(() => {
+        document.documentElement.className = theme;
+    }, [theme]);
+
     return (
-        <ThemeContext.Provider value={{ theme, setTheme: handleTheme }}>
-            {children}
-        </ThemeContext.Provider>
+      <ThemeContext.Provider value={{ theme, setTheme: handleTheme }}>
+          {children}
+      </ThemeContext.Provider>
     );
 };
 
