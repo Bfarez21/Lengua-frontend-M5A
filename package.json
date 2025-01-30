@@ -8,6 +8,7 @@
     "@mui/icons-material": "^6.3.1",
     "@mui/material": "^6.4.1",
     "@shadcn/ui": "^0.0.4",
+    "@teachablemachine/pose": "^0.8.6",
     "@tensorflow/tfjs": "^4.22.0",
     "context": "^3.0.33",
     "cra-template": "1.2.0",
@@ -52,6 +53,7 @@
     "postcss": "^8.4.35",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.11",
-    "tailwindcss": "^3.4.1"
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.7.3"
   }
 }
