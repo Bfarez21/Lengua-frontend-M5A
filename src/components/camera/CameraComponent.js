@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as tf from '@tensorflow/tfjs';
 import { API_URL } from "../../config";
-
+import { Link, useNavigate } from "react-router-dom";
 const CameraComponent = () => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -223,6 +223,12 @@ const CameraComponent = () => {
           style={styles.textarea}
           readOnly
         />
+        <Link
+          to="/camaraDetecter/poses"
+          className="bg-indigo-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-600">
+
+          Palabras
+        </Link>
       </div>
     </div>
   );
