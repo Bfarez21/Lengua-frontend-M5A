@@ -14,71 +14,74 @@ import SigninPage from "./app/signin/page";
 import CategoriesSigns from "./app/CategoriesSigns/CategoriesSigns";
 import CategoryDetailSigns from "./app/CategoriesSigns/CategoryDetailSigns";
 import CameraComponentPoses from "./components/camera/CameraComponentPose";
+import { AuthProvider } from "./firebase/AuthContext";
 
 // Crear el contexto del tema
 export const ThemeContext = createContext({
-    theme: 'dark',
-    setTheme: () => null
+  theme: "dark",
+  setTheme: () => null
 });
 
 // Proveedor personalizado del tema
 const CustomThemeProvider = ({ children }) => {
-    const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState("dark");
 
-    useEffect(() => {
-        // Primero intentamos obtener el tema guardado
-        const savedTheme = localStorage.getItem('theme');
+  useEffect(() => {
+    // Primero intentamos obtener el tema guardado
+    const savedTheme = localStorage.getItem("theme");
 
-        // Si no hay tema guardado, establecemos 'dark' como predeterminado
-        if (!savedTheme) {
-            localStorage.setItem('theme', 'dark');
-            document.documentElement.className = 'dark';
-        } else {
-            // Si hay un tema guardado, lo utilizamos
-            setTheme(savedTheme);
-            document.documentElement.className = savedTheme;
-        }
-    }, []);
+    // Si no hay tema guardado, establecemos 'dark' como predeterminado
+    if (!savedTheme) {
+      localStorage.setItem("theme", "dark");
+      document.documentElement.className = "dark";
+    } else {
+      // Si hay un tema guardado, lo utilizamos
+      setTheme(savedTheme);
+      document.documentElement.className = savedTheme;
+    }
+  }, []);
 
-    const handleTheme = (newTheme) => {
-        setTheme(newTheme);
-        localStorage.setItem('theme', newTheme);
-        document.documentElement.className = newTheme;
-    };
+  const handleTheme = (newTheme) => {
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.documentElement.className = newTheme;
+  };
 
-    // Aseguramos que el tema dark se aplique inmediatamente al montar el componente
-    useEffect(() => {
-        document.documentElement.className = theme;
-    }, [theme]);
+  // Aseguramos que el tema dark se aplique inmediatamente al montar el componente
+  useEffect(() => {
+    document.documentElement.className = theme;
+  }, [theme]);
 
-    return (
-      <ThemeContext.Provider value={{ theme, setTheme: handleTheme }}>
-          {children}
-      </ThemeContext.Provider>
-    );
+  return (
+    <ThemeContext.Provider value={{ theme, setTheme: handleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
 };
 
 const App = () => {
-    return (
-        <CustomThemeProvider>
-            <Routes>
-                <Route path="/" element={<RootLayout><Home /></RootLayout>} />
-                <Route path="/somos" element={<RootLayout><Somos /></RootLayout>} />
-                <Route path="/contact" element={<RootLayout><ContactPage /></RootLayout>} />
-                <Route path="/comentarios" element={<RootLayout><Testimonials /></RootLayout>} />
-                <Route path="/signin" element={<RootLayout><SigninPage /></RootLayout>} />
-                <Route path="/camaraDetecter" element={<RootLayout><CameraDetecter /></RootLayout>} />
-                <Route path="/camaraDetecter/poses" element={<RootLayout><CameraComponentPoses /></RootLayout>} />
-                <Route path="/jugar" element={<RootLayout>< PlayPage /></RootLayout>} />
-                <Route path="/categoria" element={<RootLayout>< CategoriesSigns /></RootLayout>} />
-                <Route path="/categoria/details/:id" element={<RootLayout><CategoryDetailSigns /></RootLayout>} />
-                <Route path="/jugar/NivelFacil" element={<RootLayout>< EasyLevel /></RootLayout>} />
-                <Route path="/jugar/NivelMedio" element={<RootLayout>< IntermediateLevel /></RootLayout>} />
-                <Route path="/jugar/NivelDificil" element={<RootLayout>< DifficultLevel /></RootLayout>} />
-                {/* Define más rutas aquí */}
-            </Routes>
-        </CustomThemeProvider>
-    );
+  return (
+    <CustomThemeProvider>
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<RootLayout><Home /></RootLayout>} />
+          <Route path="/somos" element={<RootLayout><Somos /></RootLayout>} />
+          <Route path="/contact" element={<RootLayout><ContactPage /></RootLayout>} />
+          <Route path="/comentarios" element={<RootLayout><Testimonials /></RootLayout>} />
+          <Route path="/signin" element={<RootLayout><SigninPage /></RootLayout>} />
+          <Route path="/camaraDetecter" element={<RootLayout><CameraDetecter /></RootLayout>} />
+          <Route path="/camaraDetecter/poses" element={<RootLayout><CameraComponentPoses /></RootLayout>} />
+          <Route path="/jugar" element={<RootLayout>< PlayPage /></RootLayout>} />
+          <Route path="/categoria" element={<RootLayout>< CategoriesSigns /></RootLayout>} />
+          <Route path="/categoria/details/:id" element={<RootLayout><CategoryDetailSigns /></RootLayout>} />
+          <Route path="/jugar/NivelFacil" element={<RootLayout>< EasyLevel /></RootLayout>} />
+          <Route path="/jugar/NivelMedio" element={<RootLayout>< IntermediateLevel /></RootLayout>} />
+          <Route path="/jugar/NivelDificil" element={<RootLayout>< DifficultLevel /></RootLayout>} />
+          {/* Define más rutas aquí */}
+        </Routes>
+      </AuthProvider>
+    </CustomThemeProvider>
+  );
 };
 
 export default App;

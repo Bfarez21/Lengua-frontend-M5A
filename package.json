@@ -12,6 +12,7 @@
     "@tensorflow/tfjs": "^4.22.0",
     "context": "^3.0.33",
     "cra-template": "1.2.0",
+    "firebase": "^11.2.0",
     "lucide-react": "^0.471.1",
     "next-themes": "^0.4.4",
     "npyjs": "^0.7.0",
