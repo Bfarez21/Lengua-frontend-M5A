@@ -15,6 +15,9 @@ import CategoriesSigns from "./app/CategoriesSigns/CategoriesSigns";
 import CategoryDetailSigns from "./app/CategoriesSigns/CategoryDetailSigns";
 import CameraComponentPoses from "./components/camera/CameraComponentPose";
 import { AuthProvider } from "./firebase/AuthContext";
+import PerfilUsuario from "./app/perfil/PerfilUsuario";
+import ProtectedRoute from "./firebase/ProtectedRoute";
+
 
 // Crear el contexto del tema
 export const ThemeContext = createContext({
@@ -64,20 +67,23 @@ const App = () => {
     <CustomThemeProvider>
       <AuthProvider>
         <Routes>
+          {/* Rutas públicas sin protección */}
           <Route path="/" element={<RootLayout><Home /></RootLayout>} />
           <Route path="/somos" element={<RootLayout><Somos /></RootLayout>} />
           <Route path="/contact" element={<RootLayout><ContactPage /></RootLayout>} />
           <Route path="/comentarios" element={<RootLayout><Testimonials /></RootLayout>} />
           <Route path="/signin" element={<RootLayout><SigninPage /></RootLayout>} />
-          <Route path="/camaraDetecter" element={<RootLayout><CameraDetecter /></RootLayout>} />
-          <Route path="/camaraDetecter/poses" element={<RootLayout><CameraComponentPoses /></RootLayout>} />
-          <Route path="/jugar" element={<RootLayout>< PlayPage /></RootLayout>} />
-          <Route path="/categoria" element={<RootLayout>< CategoriesSigns /></RootLayout>} />
-          <Route path="/categoria/details/:id" element={<RootLayout><CategoryDetailSigns /></RootLayout>} />
-          <Route path="/jugar/NivelFacil" element={<RootLayout>< EasyLevel /></RootLayout>} />
-          <Route path="/jugar/NivelMedio" element={<RootLayout>< IntermediateLevel /></RootLayout>} />
-          <Route path="/jugar/NivelDificil" element={<RootLayout>< DifficultLevel /></RootLayout>} />
-          {/* Define más rutas aquí */}
+
+          {/* Rutas protegidas para que no accedan desde el navegador con la url*/}
+          <Route path="/camaraDetecter" element={<ProtectedRoute><RootLayout><CameraDetecter /></RootLayout></ProtectedRoute>} />
+          <Route path="/jugar" element={<ProtectedRoute><RootLayout><PlayPage /></RootLayout></ProtectedRoute>} />
+          <Route path="/categoria" element={<ProtectedRoute><RootLayout><CategoriesSigns /></RootLayout></ProtectedRoute>} />
+          <Route path="/categoria/details/:id" element={<ProtectedRoute><RootLayout><CategoryDetailSigns /></RootLayout></ProtectedRoute>} />
+          <Route path="/perfil" element={<ProtectedRoute><RootLayout><PerfilUsuario /></RootLayout></ProtectedRoute>} />
+          <Route path="/camaraDetecter/poses" element={<ProtectedRoute><RootLayout><CameraComponentPoses /></RootLayout></ProtectedRoute>} />
+          <Route path="/jugar/NivelFacil" element={<ProtectedRoute><RootLayout><EasyLevel /></RootLayout></ProtectedRoute>} />
+          <Route path="/jugar/NivelMedio" element={<ProtectedRoute><RootLayout><IntermediateLevel /></RootLayout></ProtectedRoute>} />
+          <Route path="/jugar/NivelDificil" element={<ProtectedRoute><RootLayout><DifficultLevel /></RootLayout></ProtectedRoute>} />
         </Routes>
       </AuthProvider>
     </CustomThemeProvider>

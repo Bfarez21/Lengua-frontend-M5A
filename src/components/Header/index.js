@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Link, useLocation } from "react-router-dom"; // Importar useLocation
+import { Link, useLocation } from "react-router-dom";
 import { menuData } from "./menuData";
 import ThemeToggler from "./ThemeToggler";
-//import {theme} from "../../../tailwind.config";
-import { AuthContext } from "../../firebase/AuthContext";
-import { obtenerDetalles, loginWithGoogle, logout } from "../../firebase/authService";
-
+import { AuthContext } from "../../firebase/AuthContext"; // Asegúrate de que este contexto esté disponible
+import { logout } from "../../firebase/authService";
 
 const Header = () => {
-  const { user, logout } = useContext(AuthContext); // Obtenemos el usuario autenticado y la función de logout
+  const { user } = useContext(AuthContext); // Obtener el usuario autenticado
   const [navbarOpen, setNavbarOpen] = useState(false);
   const [sticky, setSticky] = useState(false);
   const [openIndex, setOpenIndex] = useState(-1);
@@ -38,7 +36,6 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleStickyNavbar);
   }, []);
 
-  // Usar useLocation para obtener la ruta actual
   const location = useLocation();
 
   return (
@@ -74,11 +71,11 @@ const Header = () => {
                 aria-label="Mobile Menu"
                 className="absolute right-4 top-1/2 block translate-y-[-50%] rounded-lg px-3 py-[6px] ring-primary focus:ring-2 lg:hidden"
               >
-                                <span
-                                  className={`relative my-1.5 block h-0.5 w-[30px] bg-black transition-all duration-300 dark:bg-white ${
-                                    navbarOpen ? "top-[7px] rotate-45" : ""
-                                  }`}
-                                />
+                <span
+                  className={`relative my-1.5 block h-0.5 w-[30px] bg-black transition-all duration-300 dark:bg-white ${
+                    navbarOpen ? "top-[7px] rotate-45" : ""
+                  }`}
+                />
                 <span
                   className={`relative my-1.5 block h-0.5 w-[30px] bg-black transition-all duration-300 dark:bg-white ${
                     navbarOpen ? "opacity-0" : ""
@@ -120,15 +117,15 @@ const Header = () => {
                         >
                           {menuItem.title}
                           <span className="pl-3">
-                                                        <svg width="25" height="24" viewBox="0 0 25 24">
-                                                            <path
-                                                              fillRule="evenodd"
-                                                              clipRule="evenodd"
-                                                              d="M6.29289 8.8427C6.68342 8.45217 7.31658 8.45217 7.70711 8.8427L12 13.1356L16.2929 8.8427C16.6834 8.45217 17.3166 8.45217 17.7071 8.8427C18.0976 9.23322 18.0976 9.86639 17.7071 10.2569L12 15.964L6.29289 10.2569C5.90237 9.86639 5.90237 9.23322 6.29289 8.8427Z"
-                                                              fill="currentColor"
-                                                            />
-                                                        </svg>
-                                                    </span>
+                            <svg width="25" height="24" viewBox="0 0 25 24">
+                              <path
+                                fillRule="evenodd"
+                                clipRule="evenodd"
+                                d="M6.29289 8.8427C6.68342 8.45217 7.31658 8.45217 7.70711 8.8427L12 13.1356L16.2929 8.8427C16.6834 8.45217 17.3166 8.45217 17.7071 8.8427C18.0976 9.23322 18.0976 9.86639 17.7071 10.2569L12 15.964L6.29289 10.2569C5.90237 9.86639 5.90237 9.23322 6.29289 8.8427Z"
+                                fill="currentColor"
+                              />
+                            </svg>
+                          </span>
                         </p>
                       )}
                     </li>
@@ -141,14 +138,15 @@ const Header = () => {
             <div className="flex items-center justify-end pr-16 lg:pr-0">
               {user ? (
                 <>
-                  <div className="flex items-center">
+                  <Link to="/perfil" className="flex items-center">
                     <img
                       src={user.photoURL} // Imagen del usuario
                       alt={user.displayName}
                       className="w-10 h-10 rounded-full"
                     />
                     <span className="ml-2">{user.displayName}</span>
-                  </div>
+                  </Link>
+
                   <button
                     onClick={logout}
                     className="ml-4 px-4 py-2 text-base font-medium text-gray-900 hover:opacity-70 dark:text-white"
@@ -157,20 +155,12 @@ const Header = () => {
                   </button>
                 </>
               ) : (
-                <>
-                  <Link
-                    to="/signin"
-                    className="hidden px-7 py-3 text-base font-medium text-gray-900 hover:opacity-70 dark:text-white md:block"
-                  >
-                    Iniciar sesión
-                  </Link>
-                  <Link
-                    to="/signup"
-                    className="ease-in-up hidden rounded-sm bg-blue-600 px-8 py-3 text-base font-medium text-white transition duration-300 hover:bg-opacity-90 md:block md:px-9 lg:px-6 xl:px-9"
-                  >
-                    Cerrar sesión
-                  </Link>
-                </>
+                <Link
+                  to="/signin"
+                  className="hidden px-7 py-3 text-base font-medium text-gray-900 hover:opacity-70 dark:text-white md:block"
+                >
+                  Iniciar sesión
+                </Link>
               )}
               <div>
                 <ThemeToggler />
