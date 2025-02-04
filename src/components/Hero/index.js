@@ -41,36 +41,40 @@ const Hero = () => {
             {/* Sección de texto */}
             <div className="w-full md:w-1/2 px-4 text-center md:text-center">
               <div className="max-w-[800px]">
-                <h1 className="mb-5 text-3xl font-bold leading-tight text-black dark:text-white sm:text-4xl sm:leading-tight md:text-5xl md:leading-tight">
-                  SignSpeak AI
+                <h1
+                  className="text-5xl md:text-6xl lg:text-7xl text-center font-extrabold leading-tight text-dark dark:text-blue-500 uppercase mb-10">
+                  <span className="block">SignSpeak IA</span>
                 </h1>
-                <p className="mb-12 text-base leading-relaxed text-body-color dark:text-body-color-dark sm:text-lg md:text-xl">
-                  En SignSpeak AI, nos dedicamos a romper barreras de comunicación para construir un mundo más inclusivo. Nuestro principal propósito es conectar a personas sordas con personas oyentes que no conocen el lenguaje de señas, utilizando tecnología avanzada basada en inteligencia artificial.
+                <p
+                  className="mb-12 text-base leading-relaxed text-body-color dark:text-body-color-dark sm:text-lg md:text-xl">
+                  En SignSpeak AI, nos dedicamos a romper barreras de comunicación para construir un mundo más
+                  inclusivo. Nuestro principal propósito es conectar a personas sordas con personas oyentes que no
+                  conocen el lenguaje de señas, utilizando tecnología avanzada basada en inteligencia artificial.
                 </p>
                 <div className="flex flex-wrap justify-center md:justify-center space-x-3 items-center">
                   <Link
                     to="/categoria"
-                    className="rounded-sm bg-primary px-8 py-4 text-base font-semibold text-white duration-300 ease-in-out hover:bg-primary/80"
+                    className="rounded-2xl bg-black px-8 py-4 text-base font-semibold text-white duration-300 ease-in-out hover:bg-primary/80"
                     onClick={handleLoginRedirect}
                   >
                     Categorias Señas
                   </Link>
                   <Link
                     href="https://nextjstemplates.com/templates/saas-starter-startup"
-                    className="rounded-sm bg-primary px-8 py-4 text-base font-semibold text-white duration-300 ease-in-out hover:bg-primary/80"
+                    className="rounded-2xl bg-black px-8 py-4 text-base font-semibold text-white duration-300 ease-in-out hover:bg-primary/80"
                   >
                     🔥 Descargar App
                   </Link>
                   <Link
                     to="/jugar"
-                    className="rounded-sm bg-primary px-8 py-4 text-base font-semibold text-white duration-300 ease-in-out hover:bg-primary/80"
+                    className="rounded-2xl bg-black px-8 py-4 text-base font-semibold text-white duration-300 ease-in-out hover:bg-primary/80"
                     onClick={handleLoginRedirect}
                   >
                     🔥 Jugar ahora
                   </Link>
                   <Link
                     to="/camaraDetecter"
-                    className="rounded-sm bg-green-500 px-8 py-4 text-base font-semibold text-white duration-300 ease-in-out hover:bg-green-600"
+                    className="rounded-2xl bg-green-500 px-8 py-4 text-base font-semibold text-white duration-300 ease-in-out hover:bg-green-600"
                     onClick={handleActivateCamera}
                   >
                     📸 Activar Cámara
@@ -83,7 +87,7 @@ const Hero = () => {
             <div className="w-full md:w-1/2 px-4 flex justify-center">
               <div className="max-w-[400px] md:max-w-[800px]">
                 <img
-                  src="/images/logo/img-apli01.png"
+                  src="/images/logo/img-apl001.png"
                   alt="logo"
                   className="w-full"
                   width={140}

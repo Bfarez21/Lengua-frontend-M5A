@@ -11,14 +11,14 @@ const Footer = () => {
                             <div className="mb-12 max-w-[360px] lg:mb-16">
                                 <Link href="/" className="mb-8 inline-block">
                                     <img
-                                        src="/images/logo/logoSpeak.png"
+                                        src="/images/logo/img-logo01.png"
                                         alt="logo"
                                         className="w-full dark:hidden"
                                         width={140}
                                         height={30}
                                     />
                                     <img
-                                        src="/images/logo/logoSpeak.png"
+                                        src="/images/logo/img-logo01.png"
                                         alt="logo"
                                         className="hidden w-full dark:block"
                                         width={140}
@@ -219,7 +219,7 @@ const Footer = () => {
                                 rel="noopener noreferrer"
                                 className="hover:text-primary"
                             >
-                                Erick, Bryan, Issac, Miguel,
+                                Erick, Bryan, Isaac, Miguel,
                             </a>{" "}
                             and{" "}
                             <a

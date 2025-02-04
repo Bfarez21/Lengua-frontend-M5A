@@ -52,12 +52,12 @@ const Header = () => {
           <div className="flex items-center">
             <Link to="/" className="block py-5">
               <img
-                src="/images/logo/logoSpeak.png"
+                src="/images/logo/img-logo01.png"
                 alt="logo"
                 className="h-16 dark:hidden"
               />
               <img
-                src="/images/logo/logoSpeak.png"
+                src="/images/logo/img-logo01.png"
                 alt="logo"
                 className="hidden h-10 dark:block"
               />
@@ -157,7 +157,7 @@ const Header = () => {
               ) : (
                 <Link
                   to="/signin"
-                  className="hidden px-7 py-3 text-base font-medium text-gray-900 hover:opacity-70 dark:text-white md:block"
+                  className="hidden px-7 py-3 text-base font-medium text-gray-900 hover:opacity-70 dark:text-white md:block rounded-2xl bg-blue-600"
                 >
                   Iniciar sesión
                 </Link>

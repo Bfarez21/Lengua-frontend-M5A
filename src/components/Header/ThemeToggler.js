@@ -7,7 +7,6 @@ const ThemeToggler = () => {
     console.log('ThemeToggler renderizado, tema actual:', theme);
 
     const toggleTheme = (e) => {
-        e.preventDefault();
         console.log('Botón clickeado');
         const newTheme = theme === "dark" ? "light" : "dark";
         console.log('Intentando cambiar a:', newTheme);
@@ -16,9 +15,10 @@ const ThemeToggler = () => {
 
     return (
         <button
+          type="button"
           aria-label={theme === "dark" ? "Cambiar a tema claro" : "Cambiar a tema oscuro"}
           onClick={toggleTheme}
-            className="flex items-center justify-center rounded-full cursor-pointer bg-gray-2 dark:bg-dark-bg h-9 w-9 md:h-14 md:w-14 text-black dark:text-white"
+          className="flex items-center justify-center rounded-full cursor-pointer bg-gray-2 dark:bg-dark-bg h-9 w-9 md:h-14 md:w-14 text-black dark:text-white"
         >
             {theme === "dark" ? (
                 <svg
