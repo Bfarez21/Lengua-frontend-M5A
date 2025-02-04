@@ -42,7 +42,7 @@ const Header = () => {
     <header
       className={`header left-0 top-0 z-40 flex w-full items-center ${
         sticky
-          ? "dark:bg-gray-900 dark:shadow-md fixed z-[9999] bg-white !bg-opacity-80 shadow-md backdrop-blur-sm transition"
+          ? "dark:bg-gray-900 dark:shadow fixed z-[9999] bg-white !bg-opacity-80 shadow-md backdrop-blur-sm transition"
           : "absolute bg-transparent"
       }`}
     >
@@ -59,7 +59,7 @@ const Header = () => {
               <img
                 src="/images/logo/img-logo01.png"
                 alt="logo"
-                className="hidden h-10 dark:block"
+                className="hidden h-16 dark:block"
               />
             </Link>
           </div>
@@ -157,7 +157,7 @@ const Header = () => {
               ) : (
                 <Link
                   to="/signin"
-                  className="hidden px-7 py-3 text-base font-medium text-gray-900 hover:opacity-70 dark:text-white md:block rounded-2xl bg-blue-600"
+                  className="hidden px-7 py-3 text-base font-medium text-white hover:opacity-70 dark:text-white md:block rounded-2xl bg-blue-600"
                 >
                   Iniciar sesión
                 </Link>
