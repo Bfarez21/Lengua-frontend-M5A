@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { API_URL } from "../../config";
-import Swal from "sweetalert2"; // Importamos SweetAlert2
+import Swal from "sweetalert2";
+import ServicioJuegos from "../../services/ServicioJuegos"; // Importamos el servicio para guardar datos
 
 const EasyLevel = () => {
   const [currentSign, setCurrentSign] = useState(null);
@@ -10,7 +11,7 @@ const EasyLevel = () => {
   const [attempts, setAttempts] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [signs, setSigns] = useState([]);
-  const [correctAnswers, setCorrectAnswers] = useState(0); // Contador de respuestas correctas
+  const [correctAnswers, setCorrectAnswers] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,8 +24,10 @@ const EasyLevel = () => {
 
   const fetchSigns = async () => {
     try {
+      console.log("🔍 Fetching signs...");
       const response = await fetch(`${API_URL}/gifs/letras`);
       const data = await response.json();
+      console.log("✅ Signs received:", data);
       const mappedSigns = data.map((item) => ({ sign: item.nombre, image: item.archivo }));
       setSigns(mappedSigns);
     } catch (error) {
@@ -42,44 +45,74 @@ const EasyLevel = () => {
         confirmButtonText: "¡Entendido!"
       });
     }
-  }, [signs]); // Este efecto se ejecuta solo cuando 'signs' cambia
+  }, [signs]);
 
   const setRandomSign = () => {
     if (signs.length === 0) return;
     const randomSign = signs[Math.floor(Math.random() * signs.length)];
+    console.log("🎯 Nueva seña seleccionada:", randomSign);
     setCurrentSign(randomSign);
     setFeedback("");
     setAttempts(0);
   };
 
-  const handleButtonClick = (option) => {
-    if (gameOver) return;
+  // 🔹 Guardar el progreso del juego
+  const saveGameProgress = async (updatedScore) => {
+    try {
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        console.error("❌ No hay userId en localStorage. Verifica si el usuario ha iniciado sesión.");
+        return;
+      }
+      const gameData = {
+        FK_id_usuario: userId,
+        FK_id_juego: 1,
+        FK_id_nivel: 1,
+        resultado: updatedScore
+      };
+      console.log("📤 Enviando datos a la API:", gameData);
 
+      const response = await ServicioJuegos.guardarProgreso(gameData);
+
+      console.log("✅ Respuesta de la API:", response);
+    } catch (error) {
+      console.error("❌ Error al guardar progreso:", error);
+      Swal.fire({
+        title: "Error",
+        text: "No se pudo guardar el progreso del juego",
+        icon: "error"
+      });
+    }
+  };
+
+  const handleButtonClick = async (option) => {
+    if (gameOver) return;
+    console.log("👉 Opción seleccionada:", option);
     if (currentSign && option === currentSign.sign) {
       setFeedback("✅ Correcto!");
-      setScore((prevScore) => prevScore + 1);
-      setCorrectAnswers(prev => prev + 1); // Incrementar respuestas correctas
-      if (correctAnswers + 1 >= Math.floor(signs.length / 2)) { // Si alcanzó el límite de respuestas correctas
+      setScore((prevScore) => {
+        const newScore = prevScore + 1;
+        saveGameProgress(newScore); // Guardar progreso después de cada respuesta correcta
+        return newScore;
+      });
+
+      setCorrectAnswers(prev => prev + 1);
+      if (correctAnswers + 1 >= Math.floor(signs.length / 2)) {
         setGameOver(true);
         Swal.fire({
           title: "Juego Terminado",
-          text: `¡Has acertado ${Math.floor(signs.length / 2)} respuestas! El juego ha terminado.`,
+          text: `¡Has acertado ${Math.floor(signs.length / 2)} respuestas!`,
           icon: "success",
           confirmButtonText: "Reiniciar Juego",
           showCancelButton: true,
           cancelButtonText: "Volver a Niveles",
-          reverseButtons: true
         }).then((result) => {
-          if (result.isConfirmed) {
-            restartGame(); // Reinicia el juego después de cerrar la alerta
-          } else if (result.isDismissed) {
-            // Si el usuario hace clic en "Volver a Niveles", redirige a la página de niveles
-            navigate("/jugar");
-          }
+          if (result.isConfirmed) restartGame();
+          else navigate("/jugar");
         });
-        return;
+      } else {
+        setTimeout(setRandomSign, 1000);
       }
-      setTimeout(setRandomSign, 1000);
     } else {
       const newAttempts = attempts + 1;
       setAttempts(newAttempts);
@@ -87,22 +120,16 @@ const EasyLevel = () => {
       if (newAttempts >= 2) {
         setFeedback("Juego Terminado ❌");
         setGameOver(true);
-
         Swal.fire({
           title: "Juego Terminado",
-          text: "¡Has fallado dos veces! El juego ha terminado.",
+          text: "¡Has fallado dos veces!",
           icon: "error",
           confirmButtonText: "Reiniciar Juego",
           showCancelButton: true,
           cancelButtonText: "Volver a Niveles",
-          reverseButtons: true
         }).then((result) => {
-          if (result.isConfirmed) {
-            restartGame(); // Reinicia el juego después de cerrar la alerta
-          } else if (result.isDismissed) {
-            // Si el usuario hace clic en "Volver a Niveles", redirige a la página de niveles
-            navigate("/jugar");
-          }
+          if (result.isConfirmed) restartGame();
+          else navigate("/jugar");
         });
       } else {
         setFeedback("Incorrecto ❌");
@@ -111,17 +138,17 @@ const EasyLevel = () => {
   };
 
   const restartGame = () => {
+    console.log("🔄 Reiniciando juego...");
     setScore(0);
-    setCorrectAnswers(0); // Resetear respuestas correctas
+    setCorrectAnswers(0);
     setGameOver(false);
     setRandomSign();
+    saveGameProgress(0); // Guardar el progreso con 0 puntos al reiniciar
   };
 
   return (
-    <section
-      className="relative z-10 bg-gradient-to-r from-indigo-500 to-blue-1000 overflow-hidden pt-[120px] pb-[80px] dark:bg-gray-dark">
+    <section className="relative z-10 bg-gradient-to-r from-indigo-500 to-blue-1000 overflow-hidden pt-[120px] pb-[80px] dark:bg-gray-dark">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Encabezado */}
         <div className="text-center text-white">
           <h1 className="mb-6 text-4xl font-extrabold sm:text-5xl md:text-6xl">
             Adivina la Seña - Alfabeto
@@ -171,12 +198,16 @@ const EasyLevel = () => {
 
         <div className="mt-6 flex justify-center space-x-4">
           <Link
-            to="/jugar" className="px-4 py-2 bg-gray-500 text-white rounded-lg shadow-md hover:bg-gray-600">Volver a
-            Niveles
+            to="/jugar"
+            className="px-4 py-2 bg-gray-500 text-white rounded-lg shadow-md hover:bg-gray-600"
+          >
+            Volver a Niveles
           </Link>
           <button
             onClick={restartGame}
-            className="px-4 py-2 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600">Reiniciar
+            className="px-4 py-2 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600"
+          >
+            Reiniciar
           </button>
         </div>
       </div>

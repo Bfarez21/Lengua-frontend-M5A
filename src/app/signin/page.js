@@ -8,10 +8,10 @@ const SigninPage = () => {
   const iniciarSesion = async () => {
     const user = await loginWithGoogle(); // Llama al método para iniciar sesión con Google
     if (user) {
-      console.log("Exito usuario autenticado:", user);
+      //console.log("Exito usuario autenticado:", user);
       navigate("/perfil");
     } else {
-      console.log("Fallo al iniciar sesion");
+      //console.log("Fallo al iniciar sesion");
     }
   };
 

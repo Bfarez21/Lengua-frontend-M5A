@@ -39,6 +39,8 @@ const loginWithGoogle = async () => {
     const user = result.user;
 
     if (user) {
+      console.log("✅ Usuario autenticado en Firebase:", user);
+
       // Verificar si el usuario ya existe en la base de datos
       const isUserRegistered = await checkIfUserExists(user.uid);
       if (!isUserRegistered) {
@@ -46,6 +48,16 @@ const loginWithGoogle = async () => {
         if (!registered) {
           throw new Error("No se pudo registrar el usuario");
         }
+      }
+
+      // Obtener el userId de la base de datos
+      const response = await fetch(`${BASE_URL}/buscar/${user.uid}`);
+      if (response.ok) {
+        const userData = await response.json();
+        localStorage.setItem("userId", userData.id);
+        console.log("✅ userId guardado en localStorage:", userData.id);
+      } else {
+        console.error("❌ Error al obtener el userId de la API.");
       }
     }
 
@@ -84,7 +96,7 @@ const logout = async () => {
         confirmButtonText: "Aceptar",
         confirmButtonColor: "#28a745"
       }).then(() => {
-        window.location.replace('/');
+        window.location.replace("/");
       });
     } catch (error) {
       Swal.fire({
