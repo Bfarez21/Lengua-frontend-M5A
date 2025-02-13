@@ -122,12 +122,12 @@ const Footer = () => {
                                         </Link>
                                     </li>
                                     <li>
-                                        <Link
-                                            href="/"
-                                            className="mb-4 inline-block text-base text-body-color duration-300 hover:text-primary dark:text-body-color-dark dark:hover:text-primary"
-                                        >
-                                            Pricing
-                                        </Link>
+                                        {/*<Link*/}
+                                        {/*    href="/"*/}
+                                        {/*    className="mb-4 inline-block text-base text-body-color duration-300 hover:text-primary dark:text-body-color-dark dark:hover:text-primary"*/}
+                                        {/*>*/}
+                                        {/*    Pricing*/}
+                                        {/*</Link>*/}
                                     </li>
                                     {/*<li>*/}
                                     {/*    <Link*/}
@@ -213,7 +213,7 @@ const Footer = () => {
                     <div className="h-px w-full bg-gradient-to-r from-transparent via-[#D2D8E183] to-transparent dark:via-[#959CB183]"></div>
                     <div className="py-8">
                         <p className="text-center text-base text-body-color dark:text-white">
-                            By{" "}
+                           @Desarrollo De Software By{" "}
                             <a
                                 target="_blank"
                                 rel="noopener noreferrer"
