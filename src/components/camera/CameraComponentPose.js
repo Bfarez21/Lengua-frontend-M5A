@@ -38,7 +38,7 @@ const CameraComponentPoses = () => {
       .then(response => response.json())
       .then(data => {
         if (data && data.length > 0) {
-          const activeModel = data[0];
+          const activeModel = data[1]; //indice del modelo a usar de la base
           const fullModelURL = `${API_URL_MODELS}${activeModel.model_url}`;
           const fullMetadataURL = `${API_URL_MODELS}${activeModel.metadata_url}`;
 
@@ -67,9 +67,14 @@ const CameraComponentPoses = () => {
   }, []);
 
   const loadModel = async (modelURL, metadataURL) => {
+    console.log("Cargando modelo desde:", modelURL);
+    console.log("Cargando metadata desde:", metadataURL);
+
     if (!modelURL || !metadataURL) return;
     try {
       const loadedModel = await tmPose.load(modelURL, metadataURL);
+      console.log("Modelo cargado correctamente:", loadedModel);
+      console.log("Resumen del modelo:", loadedModel.model.summary());
       setModel(loadedModel);
 
       const webcamInstance = new tmPose.Webcam(600, 600, true); // Aumentado el tamaño de la cámara
@@ -143,7 +148,7 @@ const CameraComponentPoses = () => {
           </div>
         ) : (
           <div className="flex flex-col lg:flex-row justify-between items-start gap-8 min-h-[600px]">
-            {/* Panel derecho - Cámara grande */}
+
             <div className="w-full lg:w-2/3 lg:sticky lg:top-24">
               <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6">
                 <div className="relative w-full max-w-[600px] mx-auto">
@@ -162,9 +167,8 @@ const CameraComponentPoses = () => {
               </div>
             </div>
 
-            {/* Panel izquierdo - Predicciones más compactas */}
+
             <div className="w-full lg:w-1/3 space-y-4">
-              {/* Predicción principal más compacta */}
               <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4">
                 <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">
                   Predicción Principal
@@ -183,7 +187,7 @@ const CameraComponentPoses = () => {
                 </div>
               </div>
 
-              {/* Lista de predicciones más compacta */}
+
               <div className="bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4">
                 <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">
                   Todas las Predicciones
@@ -209,7 +213,6 @@ const CameraComponentPoses = () => {
         )}
       </div>
 
-      {/* Botón de voz fijo */}
       {topPrediction.probability >= 0.9 && <VoiceButton />}
     </section>
   );

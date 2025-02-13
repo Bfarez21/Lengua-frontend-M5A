@@ -223,12 +223,6 @@ const CameraComponent = () => {
           style={styles.textarea}
           readOnly
         />
-        <Link
-          to="/camaraDetecter/poses"
-          className="bg-indigo-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-600">
-
-          Palabras
-        </Link>
       </div>
     </div>
   );

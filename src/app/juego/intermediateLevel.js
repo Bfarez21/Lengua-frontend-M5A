@@ -149,7 +149,7 @@ const IntermediateLevel = () => {
 
         {!gameOver ? (
           <div className="grid grid-cols-2 gap-4">
-            {greetings.slice(0, Math.min(4, greetings.length)).map((option) => (
+            {greetings.slice(0, Math.min(5, greetings.length)).map((option) => (
               <button
                 key={option.greeting}
                 onClick={() => handleButtonClick(option.greeting)}
