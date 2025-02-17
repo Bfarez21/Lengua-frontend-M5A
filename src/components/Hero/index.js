@@ -42,8 +42,8 @@ const Hero = () => {
             <div className="w-full md:w-1/2 px-4 text-center md:text-center">
               <div className="max-w-[800px]">
                 <h1
-                  className="text-5xl md:text-6xl lg:text-7xl text-center font-extrabold leading-tight text-dark dark:text-blue-500 uppercase mb-10">
-                  <span className="block">SignSpeak AI</span>
+                  className="text-5xl md:text-6xl lg:text-7xl text-center font-extrabold leading-tight text-dark dark:text-blue-500  mb-10">
+                  <span className="block">HablaSeñas AI</span>
                 </h1>
                 <p
                   className="mb-12 text-base leading-relaxed text-body-color dark:text-body-color-dark sm:text-lg md:text-xl">

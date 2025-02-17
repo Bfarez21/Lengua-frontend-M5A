@@ -1,38 +1,214 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import SectionTitle from "../Common/SectionTitle";
 import SingleTestimonial from "./SingleTestimonial";
-
-const testimonialData = [
-    {
-        id: 1,
-        name: "Musharof Chy",
-        designation: "Founder @TailGrids",
-        content:
-            "Our members are so impressed. It's intuitive. It's clean. It's distraction free. If you're building a community.",
-        image: "/images/testimonials/auth-01.png",
-        star: 5,
-    },
-    {
-        id: 2,
-        name: "Devid Weilium",
-        designation: "Founder @UIdeck",
-        content:
-            "Our members are so impressed. It's intuitive. It's clean. It's distraction free. If you're building a community.",
-        image: "/images/testimonials/auth-02.png",
-        star: 5,
-    },
-    {
-        id: 3,
-        name: "Lethium Frenci",
-        designation: "Founder @Lineicons",
-        content:
-            "Our members are so impressed. It's intuitive. It's clean. It's distraction free. If you're building a community.",
-        image: "/images/testimonials/auth-03.png",
-        star: 5,
-    },
-];
+import { AuthContext } from "../../firebase/AuthContext";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const Testimonials = () => {
+
+    const { user } = useContext(AuthContext); // Obtener el usuario autenticado
+    const [userId, setUserId] = useState(null);
+    const [comentarios, setComentarios] = useState([]);
+    const [comentario, setComentario] = useState("");
+    const navigate = useNavigate();
+    const [rating, setRating] = useState(5);
+    const [nombreUsuario, setNombreUsuario] = useState("");
+
+    const handleRating = (value) => {
+        setRating(value);
+    };
+
+    const processComments = (comments) => {
+        return comments
+          .sort((a, b) => new Date(b.fecha_fee) - new Date(a.fecha_fee))
+          .slice(0, 3);
+    };
+
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+
+        if (!user) {
+            navigate('/signin');
+            return;
+        }
+
+        try {
+            const feedbackData = {
+                comentario_fee: comentario,
+                calificacion_fee: rating,
+                fecha_fee: new Date().toISOString(),
+                fk_id_usu: userId,
+                nombreUsuario: user.displayName
+            };
+
+            //console.log("Datos a enviar:", JSON.stringify(feedbackData, null, 2));
+
+            const response = await fetch("http://localhost:8000/api/feedback/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    //header de autenticación
+                },
+                body: JSON.stringify(feedbackData),
+            });
+
+            if (response.ok) {
+                const newFeedback = await response.json();
+
+                const feedbackConNombre = {
+                    ...newFeedback,
+                    nombreUsuario: user.displayName || nombreUsuario || "Anónimo",
+                    fk_id_usu: userId
+                };
+
+                setComentarios(prevComentarios =>
+                  processComments([feedbackConNombre, ...prevComentarios])
+                );
+                await Swal.fire({
+                    title: '¡Gracias!',
+                    text: 'Tu comentario y calificación han sido enviados.',
+                    icon: 'success',
+                    confirmButtonText: 'Aceptar'
+                });
+
+                // Limpiar el formulario
+                setComentario("");
+                setRating(5);
+
+                // Actualizar la lista de comentarios
+                const updatedResponse = await fetch("http://localhost:8000/api/feedback/");
+                if (updatedResponse.ok) {
+                    const updatedComments = await updatedResponse.json();
+                    const commentosConNombres = updatedComments.map(comment => ({
+                        ...comment,
+                        nombreUsuario: comment.fk_id_usu === userId
+                          ? (user.displayName || nombreUsuario || "Anónimo")
+                          : (comment.nombreUsuario || "Anónimo")
+                    }));
+                    setComentarios(processComments(commentosConNombres));
+                }
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Error al enviar el comentario');
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            await Swal.fire({
+                title: 'Error',
+                text: 'Hubo un problema al enviar tu comentario. Por favor, intenta nuevamente.',
+                icon: 'error',
+                confirmButtonText: 'Aceptar'
+            });
+        }
+    };
+
+    useEffect(() => {
+        if (user && user.displayName) {
+            setNombreUsuario(user.displayName);
+            //console.log("Usuario actual:", user.displayName);
+        }
+    }, [user]);
+
+    useEffect(() => {
+        const fetchComentarios = async () => {
+            try {
+                const response = await fetch("http://localhost:8000/api/feedback/");
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // Obtener los datos de usuario para cada comentario
+                    const comentariosConUsuarios = await Promise.all(
+                      data.map(async (comentario) => {
+                          try {
+
+                              // Si el comentario es del usuario actual, usar su nombre
+                              if (comentario.fk_id_usu === userId) {
+                                  return {
+                                      ...comentario,
+                                      nombreUsuario: user?.displayName || nombreUsuario || "Anónimo"
+                                  };
+                              }
+
+                              const userResponse = await fetch(`http://localhost:8000/api/usuarios/${comentario.fk_id_usu.uid.displayName}`);
+                              if (userResponse.ok) {
+                                  const userData = await userResponse.json();
+                                  const nombreMostrado = user.id && comentario.fk_id_usu === userId
+                                    ? user.displayName
+                                    : userData.id || "Anónimo";
+                                  return {
+                                      ...comentario,
+                                      nombreUsuario: nombreMostrado
+                                  };
+                              }
+                              //console.log("NOMBREEE", comentario);
+                              return comentario;
+                          } catch (error) {
+                              return {
+                                  ...comentario,
+                                  nombreUsuario: user && comentario.fk_id_usu === userId
+                                    ? user.displayName
+                                    : "Anónimo"
+                              };
+                          }
+                      })
+                    );
+
+                    //console.log("Comentarios con usuarios:", comentariosConUsuarios);
+                    setComentarios(processComments(comentariosConUsuarios));
+                } else {
+                    console.error("Error al obtener comentarios");
+                }
+            } catch (error) {
+                console.error("Error al obtener comentarios:", error);
+            }
+        };
+
+        fetchComentarios();
+    }, [user, userId]);
+
+    useEffect(() => {
+        const fetchUserId = async () => {
+            if (user?.uid) {
+                try {
+                    const response = await fetch(`http://localhost:8000/api/usuarios/google/${user.uid}`);
+                    if (response.ok) {
+                        const userData = await response.json();
+                        setUserId(userData.id);
+                    }
+                } catch (error) {
+                    console.error("Error al obtener el ID del usuario:", error);
+                }
+            }
+        };
+
+        fetchUserId();
+    }, [user]);
+
+    // useEffect(() => {
+    //     const obtenerIdUsuario = async () => {
+    //         if (user?.google_id) {
+    //             try {
+    //                 const response = await fetch(`http://localhost:8000/api/usuarios/google/${user.google_id}`);
+    //                 console.log("Respuesta del servidor:", response);
+    //                 if (response.ok) {
+    //                     const userData = await response.json();
+    //                     setUserId(userData.id); // Guarda el ID del usuario (4 en tu caso)
+    //                     console.log("ID A enviar :" , userData);
+    //                 }
+    //             } catch (error) {
+    //                 console.error("Error al obtener el ID del usuario:", error);
+    //             }
+    //         }
+    //     };
+    //
+    //     obtenerIdUsuario();
+    // }, [user]);
+
+    useEffect(() => {
+        //console.log("Usuario ID:", userId);
+    }, [userId]);
+
     return (
         <section className="dark:bg-bg-color-dark bg-gray-light relative z-10 py-16 md:py-20 lg:py-28">
             <div className="container">
@@ -44,14 +220,16 @@ const Testimonials = () => {
                 />
 
                 <div className="grid grid-cols-1 gap-x-8 gap-y-10 md:grid-cols-2 lg:grid-cols-3 mb-8">
-                    {testimonialData.map((testimonial) => (
+                    {comentarios.map((testimonial) => (
                       <SingleTestimonial key={testimonial.id} testimonial={testimonial} />
                     ))}
                 </div>
+
+
                 <form>
                     <div className="-mx-4 flex flex-wrap">
                         <div className="w-full px-4">
-                            <div className="mb-8">
+                            <div className="mb-1">
                                 <label
                                   htmlFor="message"
                                   className="mb-3 block text-sm font-medium text-dark dark:text-white"
@@ -62,12 +240,31 @@ const Testimonials = () => {
                                   name="message"
                                   rows={5}
                                   placeholder="Ingresa tu comentario"
+                                  value={comentario}
+                                  onChange={(e) => setComentario(e.target.value)}
                                   className="border-stroke w-full resize-none rounded-2xl border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
                                 ></textarea>
                             </div>
                         </div>
+                        {/* Sección de calificación */}
+                        <div className="w-full px-5 mb-2">
+                            <div className="flex">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <button
+                                    key={star}
+                                    type="button"
+                                    className={`text-4xl ${star <= rating ? 'text-yellow' : 'text-gray-300'}`}
+                                    onClick={() => handleRating(star)} // Actualiza la calificación
+                                  >
+                                      ★
+                                  </button>
+                                ))}
+                            </div>
+                        </div>
                         <div className="w-full px-4">
                             <button
+                              type="submit"
+                              onClick={handleSubmit}
                               className="rounded-2xl bg-primary px-9 py-4 text-base font-medium text-white shadow-submit duration-300 hover:bg-primary/90 dark:shadow-submit-dark">
                                 Enviar
                             </button>

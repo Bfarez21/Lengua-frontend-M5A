@@ -7,10 +7,15 @@ const starIcon = (
 );
 
 const SingleTestimonial = ( {testimonial}) => {
-    const { star, name, image, content, designation } = testimonial;
+
+    //console.log("Datos del testimonial:", testimonial);
+
+    const { comentario_fee, calificacion_fee, fecha_fee, nombreUsuario } = testimonial;
+
+    //console.log("nombree Testimonial", nombreUsuario)
 
     let ratingIcons = [];
-    for (let index = 0; index < star; index++) {
+    for (let index = 0; index < calificacion_fee; index++) {
         ratingIcons.push(
             <span key={index} className="text-yellow">
         {starIcon}
@@ -23,17 +28,23 @@ const SingleTestimonial = ( {testimonial}) => {
             <div className="rounded-sm bg-white p-8 shadow-two duration-300 hover:shadow-one dark:bg-dark dark:shadow-three dark:hover:shadow-gray-dark lg:px-5 xl:px-8">
                 <div className="mb-5 flex items-center space-x-1">{ratingIcons}</div>
                 <p className="mb-8 border-b border-body-color border-opacity-10 pb-8 text-base leading-relaxed text-body-color dark:border-white dark:border-opacity-10 dark:text-white">
-                    “{content}
+                    “{comentario_fee}"
                 </p>
                 <div className="flex items-center">
                     <div className="relative mr-4 h-[50px] w-full max-w-[50px] overflow-hidden rounded-full">
-                        <img src={image} alt={name}  />
+                        <img src="/images/img-user01.png"/>
+                        {/*<img src={image} alt={nombreUsuario || "Usuario"} />*/}
                     </div>
                     <div className="w-full">
-                        <h3 className="mb-1 text-lg font-semibold text-dark dark:text-white lg:text-base xl:text-lg">
-                            {name}
+                    <h3 className="mb-1 text-lg font-semibold text-dark dark:text-white lg:text-base xl:text-lg">
+                            {/*{fk_id_usu}*/}
+
                         </h3>
-                        <p className="text-sm text-body-color">{designation}</p>
+                        <h3 className="mb-1 text-lg font-semibold text-dark dark:text-white lg:text-base xl:text-lg">
+                            {nombreUsuario || "Anonimo"}
+                        </h3>
+                        {/*<p>{testimonial.comentario_fee}</p>*/}
+                        <p className="text-sm text-body-color">{new Date(fecha_fee).toLocaleDateString("es-ES")}</p>
                     </div>
                 </div>
             </div>

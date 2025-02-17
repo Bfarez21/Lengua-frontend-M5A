@@ -4,12 +4,9 @@ import { ThemeContext} from "../../App";
 
 const ThemeToggler = () => {
     const { theme, setTheme } = useContext(ThemeContext);
-    console.log('ThemeToggler renderizado, tema actual:', theme);
 
     const toggleTheme = (e) => {
-        console.log('Botón clickeado');
         const newTheme = theme === "dark" ? "light" : "dark";
-        console.log('Intentando cambiar a:', newTheme);
         setTheme(newTheme);
     };
 
