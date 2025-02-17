@@ -1,9 +1,13 @@
 import { auth } from "./firebase";
 import firebase from "firebase/compat/app";
 import Swal from "sweetalert2";
+import { API_URL } from "../config";
 
-// URL del backend (ajústala según tu configuración)
-const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000/api/usuarios"; // Utiliza la variable de entorno para la URL
+// URL del backend
+const BASE_URL = `${API_URL}/usuarios`; // Utiliza la variable de entorno para la URL
+
+//Variable para manejar el estado de las variables
+let logueando = false;
 
 // Función para verificar si el servidor está disponible
 const isServerAvailable = async () => {
@@ -22,6 +26,12 @@ const isServerAvailable = async () => {
 // Iniciar sesión con Google
 const loginWithGoogle = async () => {
   const serverAvailable = await isServerAvailable(); // Verificar si el servidor está disponible
+  //Evitar multiples clicks
+  if (logueando) {
+    return;
+  }
+  logueando = true; //Se bloquea el boton
+
   if (!serverAvailable) {
     Swal.fire({
       icon: "error",
@@ -39,8 +49,7 @@ const loginWithGoogle = async () => {
     const user = result.user;
 
     if (user) {
-      console.log("✅ Usuario autenticado en Firebase:", user);
-
+      //console.log("✅ Usuario autenticado en Firebase:", user);
       // Verificar si el usuario ya existe en la base de datos
       const isUserRegistered = await checkIfUserExists(user.uid);
       if (!isUserRegistered) {
@@ -55,21 +64,30 @@ const loginWithGoogle = async () => {
       if (response.ok) {
         const userData = await response.json();
         localStorage.setItem("userId", userData.id);
-        console.log("✅ userId guardado en localStorage:", userData.id);
+        //console.log("✅ userId guardado en localStorage:", userData.id);
       } else {
-        console.error("❌ Error al obtener el userId de la API.");
+        //console.error("❌ Error al obtener el userId de la API.");
       }
     }
-
     return user; // Retorna el usuario autenticado
   } catch (error) {
-    Swal.fire({
-      icon: "error",
-      title: "Error al Iniciar Sesión",
-      text: error.message,
-      confirmButtonText: "Intentar de nuevo"
-    });
-    throw error; // Propaga el error hacia el componente de React
+    if (error.code === "auth/popup-closed-by-user") {
+      Swal.fire({
+        icon: "warning",
+        title: "Inicio de sesión cancelado",
+        text: "Parece que cerraste la ventana de autenticación antes de completar el proceso.",
+        confirmButtonText: "Intentar de nuevo"
+      });
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Error al Iniciar Sesión",
+        text: error.message,
+        confirmButtonText: "Intentar de nuevo"
+      });
+    }
+  } finally {
+    logueando = false; //Desbloquear el boton
   }
 };
 

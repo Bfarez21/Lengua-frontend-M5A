@@ -1,185 +1,231 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import Swal from "sweetalert2"; // Importamos SweetAlert2
 import { API_URL } from "../../config";
-import { useNavigate } from 'react-router-dom';
+import ServicioJuegos from "../../services/ServicioJuegos";
 
 const IntermediateLevel = () => {
-  const [currentGreeting, setCurrentGreeting] = useState(null);
-  const [feedback, setFeedback] = useState("");
-  const [score, setScore] = useState(0);
-  const [attempts, setAttempts] = useState(0);
-  const [gameOver, setGameOver] = useState(false);
-  const [correctAnswers, setCorrectAnswers] = useState(0);  // Estado para respuestas correctas
-  const [greetings, setGreetings] = useState([]);
-  const navigate = useNavigate();
+  const [senaActual, setSenaActual] = useState(null);
+  const [retroalimentacion, setRetroalimentacion] = useState("");
+  const [puntaje, setPuntaje] = useState(0);
+  const [intentos, setIntentos] = useState(0);
+  const [juegoTerminado, setJuegoTerminado] = useState(false);
+  const [senas, setSenas] = useState([]);
+  const [opciones, setOpciones] = useState([]);
+  const [respuestasCorrectas, setRespuestasCorrectas] = useState(0);
+  const [categoriaActual, setCategoriaActual] = useState("Colores");
+  const [puntajeFinal, setPuntajeFinal] = useState(0);
 
   useEffect(() => {
-    const fetchGreetings = async () => {
-      try {
-        const response = await fetch(`${API_URL}/gifs/saludos`);
-        const data = await response.json();
-        const mappedGreetings = data.map(item => ({
-          greeting: item.nombre,
-          image: item.archivo
-        }));
-        setGreetings(mappedGreetings);
-      } catch (error) {
-        console.error("Error al obtener los saludos:", error);
-      }
-    };
-    fetchGreetings();
-  }, []);
+    obtenerSenas(categoriaActual);
+  }, [categoriaActual]);
 
   useEffect(() => {
-    if (greetings.length > 0) {
-      setRandomGreeting();
-      Swal.fire({
-        title: "¡Bienvenido!",
-        text: "¡Tienes 2 intentos! Si fallas 2 veces, el juego finalizará.",
-        icon: "info",
-        confirmButtonText: "¡Entendido!"
-      });
+    if (senas.length > 0) {
+      seleccionarSenaAleatoria();
     }
-  }, [greetings]);
+  }, [senas]);
 
-  const setRandomGreeting = () => {
-    const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
-    setCurrentGreeting(randomGreeting);
-    setFeedback("");
-    setAttempts(0);
+  const obtenerSenas = async (categoria) => {
+    try {
+      const respuesta = await fetch(
+        `${API_URL}/gifs/por_categoria?nombre=${categoria}`,
+      );
+      if (!respuesta.ok) {
+        throw new Error(`Error en la solicitud: ${respuesta.status}`);
+      }
+      const datosRespuesta = await respuesta.json();
+      if (!datosRespuesta.success || !Array.isArray(datosRespuesta.data)) {
+        throw new Error("Respuesta inesperada del servidor");
+      }
+      const senasMapeadas = datosRespuesta.data.map((item) => ({
+        id: item.id,
+        sena: item.nombre || "Sin nombre",
+        imagen: item.archivo.startsWith("http")
+          ? item.archivo
+          : `${API_URL}${item.archivo}`,
+      }));
+      setSenas(senasMapeadas);
+    } catch (error) {
+      console.error("❌ Error al obtener las señales:", error);
+    }
   };
 
-  const handleButtonClick = (option) => {
-    if (gameOver) return;
+  const seleccionarSenaAleatoria = () => {
+    if (senas.length === 0) return;
 
-    if (currentGreeting && option === currentGreeting.greeting) {
-      setFeedback("¡Correcto! 🎉");
-      setScore((prevScore) => prevScore + 1);
-      setCorrectAnswers((prevCorrectAnswers) => prevCorrectAnswers + 1);  // Incrementamos respuestas correctas
-      setTimeout(setRandomGreeting, 1000);
+    const senaAleatoria = senas[Math.floor(Math.random() * senas.length)];
+    setSenaActual(senaAleatoria);
 
-      // Condición para finalizar el juego si se alcanzan la mitad de respuestas correctas
-      if (correctAnswers + 1 >= Math.floor(greetings.length / 2)) {
-        setFeedback("¡Felicidades, has ganado! 🎉");
-        setGameOver(true);
-        Swal.fire({
-          title: "Juego Terminando",
-          text: `¡Has acertado ${Math.floor(greetings.length / 2)} respuestas! El juego ha terminado.`,
-          icon: "success",
-          confirmButtonText: "Reiniciar Juego",
-          showCancelButton: true,
-          cancelButtonText: "Volver a Niveles",
-          reverseButtons: true
-        }).then((result) => {
-          if (result.isConfirmed) {
-            restartGame(); // Reinicia el juego después de cerrar la alerta
-          } else if (result.isDismissed) {
-            // Si el usuario hace clic en "Volver a Niveles", redirige a la página de niveles
-            navigate("/jugar");
-          }
-        });
+    const opcionesDisponibles = senas.filter(
+      (s) => s.sena !== senaAleatoria.sena,
+    );
+    const totalOpciones = Math.min(4, Math.max(2, senas.length));
+    const opcionesAdicionales = [];
+
+    for (
+      let i = 0;
+      i < totalOpciones - 1 && opcionesDisponibles.length > 0;
+      i++
+    ) {
+      const indiceAleatorio = Math.floor(
+        Math.random() * opcionesDisponibles.length,
+      );
+      opcionesAdicionales.push(opcionesDisponibles[indiceAleatorio]);
+      opcionesDisponibles.splice(indiceAleatorio, 1);
+    }
+
+    const nuevasOpciones = [...opcionesAdicionales, senaAleatoria].sort(
+      () => Math.random() - 0.5,
+    );
+
+    setOpciones(nuevasOpciones);
+    setRetroalimentacion("");
+    setIntentos(0);
+  };
+
+  const guardarProgresoJuego = async (puntajeActualizado) => {
+    try {
+      const idUsuario = localStorage.getItem("userId");
+      if (!idUsuario) {
+        //console.error("❌ No hay userId en localStorage");
+        return;
+      }
+      const datosJuego = {
+        FK_id_usuario: idUsuario,
+        FK_id_juego: 1,
+        FK_id_nivel: 2,
+        resultado: puntajeActualizado,
+      };
+      //console.log("📤 Enviando datos a la API:", datosJuego);
+      const respuesta = await ServicioJuegos.guardarProgreso(datosJuego);
+      //console.log("✅ Respuesta de la API:", respuesta);
+    } catch (error) {
+      console.error("❌ Error al guardar progreso:", error);
+    }
+  };
+
+  const manejarFinalizacionCategoria = async () => {
+    if (categoriaActual === "Colores") {
+      setCategoriaActual("Familia");
+      setRespuestasCorrectas(0);
+      setJuegoTerminado(false);
+    } else {
+      setJuegoTerminado(true);
+      setPuntajeFinal(puntaje);
+    }
+  };
+
+  const manejarSeleccionOpcion = async (opcion) => {
+    if (juegoTerminado) return;
+
+    if (senaActual && opcion === senaActual.sena) {
+      const nuevoPuntaje = puntaje + 1;
+      setPuntaje(nuevoPuntaje);
+      setRetroalimentacion("✅ ¡Correcto!");
+      //console.log("📊 Puntaje actualizado:", nuevoPuntaje);
+      await guardarProgresoJuego(nuevoPuntaje);
+
+      const nuevasRespuestasCorrectas = respuestasCorrectas + 1;
+      setRespuestasCorrectas(nuevasRespuestasCorrectas);
+
+      if (nuevasRespuestasCorrectas >= Math.floor(senas.length / 2)) {
+        await manejarFinalizacionCategoria();
+      } else {
+        setTimeout(seleccionarSenaAleatoria, 1000);
       }
     } else {
-      const newAttempts = attempts + 1;
-      setAttempts(newAttempts);
+      const nuevosIntentos = intentos + 1;
+      setIntentos(nuevosIntentos);
 
-      if (newAttempts >= 2) {
-        setFeedback("Juego Terminado ❌");
-        setGameOver(true);
-        Swal.fire({
-          title: "Juego Terminado",
-          text: "¡Has fallado dos veces! El juego ha terminado.",
-          icon: "error",
-          confirmButtonText: "Reiniciar Juego",
-          showCancelButton: true,
-          cancelButtonText: "Volver a Niveles",
-          reverseButtons: true
-        }).then((result) => {
-          if (result.isConfirmed) {
-            restartGame(); // Reinicia el juego después de cerrar la alerta
-          } else if (result.isDismissed) {
-            // Si el usuario hace clic en "Volver a Niveles", redirige a la página de niveles
-            navigate("/jugar");
-          }
-        });
+      if (nuevosIntentos >= 2) {
+        setJuegoTerminado(true);
+        setPuntajeFinal(puntaje);
+        reiniciarJuego();
       } else {
-        setFeedback(`Incorrecto ❌ Te quedan ${2 - newAttempts} intentos.`);
-        Swal.fire({
-          title: "Incorrecto",
-          text: `Te quedan ${2 - newAttempts} intentos.`,
-          icon: "error",
-          confirmButtonText: "Intentar de nuevo"
-        });
+        setRetroalimentacion("❌ Incorrecto. Inténtalo de nuevo.");
       }
     }
   };
 
-  const restartGame = () => {
-    setScore(0);
-    setCorrectAnswers(0);  // Reseteamos las respuestas correctas
-    setGameOver(false);
-    setRandomGreeting();
+  const reiniciarJuego = () => {
+    setCategoriaActual("Colores");
+    setPuntaje(0);
+    setRespuestasCorrectas(0);
+    setJuegoTerminado(false);
+    obtenerSenas("Colores");
+    guardarProgresoJuego(0);
   };
 
   return (
-    <section
-      className="relative z-10 bg-gradient-to-r from-indigo-500 to-blue-1000 overflow-hidden pt-[120px] pb-[80px] dark:bg-gray-dark">
+    <section className="to-blue-1000 relative z-10 overflow-hidden bg-gradient-to-r from-indigo-500 pb-[80px] pt-[120px] dark:bg-gray-dark">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Encabezado */}
         <div className="text-center text-white">
-          <h1 className="mb-6 text-4xl font-extrabold sm:text-5xl md:text-6xl">
-            Adivina la Seña - Saludos
+          <h1 className="mb-4 text-3xl font-extrabold sm:text-3xl md:text-4xl">
+            Adivina la Seña - {categoriaActual}
           </h1>
-          <p className="mb-10 text-lg leading-relaxed sm:text-xl md:text-2xl max-w-3xl mx-auto">
-            A continuación tienes una seña en pantalla, selecciona la respuesta
-            correspondiente de las siguientes opciones:
+          <p className="md:text-1xl mx-auto mb-10 max-w-3xl text-lg leading-relaxed sm:text-xl">
+            Selecciona la respuesta correcta para la seña mostrada:
           </p>
         </div>
 
-        {!gameOver && currentGreeting && (
-          <div className="flex justify-center mb-6">
-            <img
-              src={currentGreeting.image}
-              alt={`Seña de ${currentGreeting.greeting}`}
-              className="w-72 h-72 rounded-lg shadow-lg border-4 border-white animate-fade-in"
-            />
-          </div>
-        )}
+        {!juegoTerminado ? (
+          <>
+            {senaActual && (
+              <div className="mb-6 flex justify-center">
+                <img
+                  src={senaActual.imagen}
+                  alt={`Seña de ${senaActual.sena}`}
+                  className="animate-fade-in h-72 w-72 rounded-lg border-4 border-white shadow-lg"
+                />
+              </div>
+            )}
 
-        {!gameOver ? (
-          <div className="grid grid-cols-2 gap-4">
-            {greetings.slice(0, Math.min(5, greetings.length)).map((option) => (
-              <button
-                key={option.greeting}
-                onClick={() => handleButtonClick(option.greeting)}
-                className="px-6 py-3 bg-white text-indigo-700 font-bold rounded-lg shadow-md hover:bg-indigo-100 transition duration-300"
-              >
-                {option.greeting}
-              </button>
-            ))}
-          </div>
+            <div className="grid grid-cols-2 gap-4">
+              {opciones.map((opcion) => (
+                <button
+                  key={opcion.sena}
+                  onClick={() => manejarSeleccionOpcion(opcion.sena)}
+                  className="rounded-lg bg-white px-6 py-3 font-bold text-indigo-700 shadow-md transition duration-300 hover:bg-indigo-100"
+                >
+                  {opcion.sena}
+                </button>
+              ))}
+            </div>
+
+            {retroalimentacion && (
+              <p className="animate-fade-in mt-4 text-lg font-semibold text-white">
+                {retroalimentacion}
+              </p>
+            )}
+
+            <div className="mt-4 text-center text-lg text-white">
+              <p>Puntuación Total: {puntaje}</p>
+              <p>Categoría Actual: {categoriaActual}</p>
+              <p>Intentos Restantes: {2 - intentos}</p>
+            </div>
+          </>
         ) : (
-          <div className="flex flex-col items-center mt-6">
-            <p className="text-xl font-semibold mb-4">Juego terminado</p>
-            <button
-              onClick={restartGame}
-              className="px-6 py-3 bg-green-500 text-white font-bold rounded-lg shadow-md hover:bg-green-600 transition"
-            >
-              Reiniciar Juego
-            </button>
+          <div className="rounded-lg bg-indigo-600 p-8 text-center text-white shadow-lg">
+            <h2 className="mb-6 text-3xl font-bold">¡Juego Finalizado!</h2>
+            <p className="mb-8 text-2xl">
+              Puntaje Total Final: {puntajeFinal} puntos
+            </p>
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={reiniciarJuego}
+                className="rounded-lg bg-green-500 px-6 py-3 font-bold text-white shadow-md transition hover:bg-green-600"
+              >
+                Jugar de Nuevo
+              </button>
+              <Link
+                to="/jugar"
+                className="rounded-lg bg-blue-500 px-6 py-3 font-bold text-white shadow-md transition hover:bg-blue-600"
+              >
+                Volver a Niveles
+              </Link>
+            </div>
           </div>
         )}
-
-        {feedback && <p className="mt-4 text-lg font-semibold animate-fade-in">{feedback}</p>}
-        <p className="mt-4 text-lg">Puntuación: {score}</p>
-
-        <div className="mt-6 flex justify-center space-x-4">
-          <Link
-            to="/jugar" className="px-4 py-2 bg-gray-500 text-white rounded-lg shadow-md hover:bg-gray-600">
-            Regresar
-          </Link>
-        </div>
       </div>
     </section>
   );

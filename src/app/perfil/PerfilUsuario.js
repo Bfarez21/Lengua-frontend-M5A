@@ -28,7 +28,7 @@ const PerfilUsuario = () => {
 
         if (userDetails?.uid) {
           const stats = await ServicioUsuario.obtenerEstadisticasUsuario(userDetails.uid);
-          console.log("📊 Estadísticas recibidas:", stats);
+          console.log("📊 Estadísticas procesadas:", stats);
           setEstadisticas(stats);
         }
       } catch (error) {
@@ -39,24 +39,34 @@ const PerfilUsuario = () => {
     fetchUserDetails();
   }, []);
 
+  // 📌 Aseguramos que los niveles sean consistentes, incluso si el backend no los envía
   const chartData = useMemo(() => {
-    if (!estadisticas || !estadisticas.niveles || estadisticas.niveles.length === 0) {
+    if (!estadisticas || !estadisticas.niveles) {
       return null;
     }
 
     return {
-      labels: estadisticas.niveles.map(nivel => nivel.nombre), // Nombres de niveles en X
+      labels: estadisticas.niveles.map(nivel => nivel.nombre),
       datasets: [
         {
           label: "Puntos acumulados",
-          data: estadisticas.niveles.map(nivel => nivel.puntos), // Puntos en Y
-          backgroundColor: "rgba(255, 99, 132, 0.6)", // Color más llamativo
-          borderColor: "rgb(255, 99, 132)",
+          data: estadisticas.niveles.map(nivel => nivel.puntos),
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.6)',  // Rojo para Fácil
+            'rgba(54, 162, 235, 0.6)',  // Azul para Medio
+            'rgba(255, 206, 86, 0.6)'   // Amarillo para Difícil
+          ],
+          borderColor: [
+            'rgb(255, 99, 132)',
+            'rgb(54, 162, 235)',
+            'rgb(255, 206, 86)'
+          ],
           borderWidth: 2
         }
       ]
     };
   }, [estadisticas]);
+
 
   const chartOptions = useMemo(() => ({
     responsive: true,
@@ -80,21 +90,13 @@ const PerfilUsuario = () => {
     },
     scales: {
       x: {
-        ticks: {
-          color: "#fff"
-        },
-        grid: {
-          color: "rgba(255, 255, 255, 0.1)"
-        }
+        ticks: { color: "#fff" },
+        grid: { color: "rgba(255, 255, 255, 0.1)" }
       },
       y: {
         beginAtZero: true,
-        ticks: {
-          color: "#fff"
-        },
-        grid: {
-          color: "rgba(255, 255, 255, 0.1)"
-        }
+        ticks: { color: "#fff" },
+        grid: { color: "rgba(255, 255, 255, 0.1)" }
       }
     }
   }), []);
@@ -104,7 +106,7 @@ const PerfilUsuario = () => {
       chartInstanceRef.current.destroy();
     }
 
-    if (chartData) {
+    if (chartData && chartRef.current) {
       chartInstanceRef.current = new ChartJS(chartRef.current, {
         type: "bar",
         data: chartData,
@@ -147,10 +149,18 @@ const PerfilUsuario = () => {
                 </div>
               </div>
 
-              <h6 className="font-semibold text-lg mb-4">Progreso y Aprendizaje</h6>
-              <p className="text-lg text-gray-900 dark:text-gray-100">
-                Puntos acumulados: {estadisticas?.total_puntos || 0}
-              </p>
+              <h6 className="font-semibold text-lg mb-2">Progreso y Aprendizaje</h6>
+              {estadisticas?.niveles ? (
+                <ul className="text-lg text-gray-900 dark:text-gray-100">
+                  {estadisticas.niveles.map((nivel) => (
+                    <li key={nivel.nombre}>{nivel.nombre}: {nivel.puntos} pts</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-lg text-gray-900 dark:text-gray-100">
+                  Puntos acumulados: {estadisticas?.total_puntos || 0}
+                </p>
+              )}
             </div>
           </div>
 

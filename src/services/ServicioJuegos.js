@@ -18,6 +18,18 @@ const ServicioJuegos = {
       throw error;
     }
   },
+  async obtenerGifsPorNivel(nivelId) {
+    try {
+      const response = await fetch(`${API_URL}/gifs?categoria=${nivelId}`);
+      if (!response.ok) {
+        throw new Error("Error al obtener los GIFs.");
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("❌ Error en obtenerGifsPorNivel:", error);
+      throw error;
+    }
+  }
 };
 
 export default ServicioJuegos;
