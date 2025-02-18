@@ -1,268 +1,278 @@
-import { useEffect, useRef, useState } from 'react';
-import * as tf from '@tensorflow/tfjs';
-import { API_URL } from "../../config";
-import { Link, useNavigate } from "react-router-dom";
-const CameraComponent = () => {
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-  const [text, setText] = useState("");
-  const [model, setModel] = useState(null);
-  const [labelEncoder, setLabelEncoder] = useState(null);
-  const [predictions, setPredictions] = useState([]);
-  const [isPoseModel, setIsPoseModel] = useState(false);  // Nuevo estado para detectar el modelo de poses
+import { useEffect, useRef, useState, useCallback } from "react";
+import Webcam from "react-webcam";
+import * as tf from "@tensorflow/tfjs";
 
-  const speakText = (text) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'es-ES';
-    window.speechSynthesis.speak(utterance);
+const CameraComponent = () => {
+  const webcamRef = useRef(null);
+  const [text, setText] = useState("");
+  const [confidence, setConfidence] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isModelLoading, setIsModelLoading] = useState(false);
+  const lastPredictionTimeRef = useRef(Date.now());
+  const tensorRef = useRef(null);
+  const [activeModel, setActiveModel] = useState("alfabeto");
+  const modelRef = useRef(null);
+  const [labelEncoder, setLabelEncoder] = useState(null);
+
+  const PREDICTION_INTERVAL = 500;
+  const CONFIDENCE_THRESHOLD = 0.9;
+
+  const MODELS = {
+    numeros: {
+      url: "https://teachablemachine.withgoogle.com/models/bFBi4-0fM/",
+      name: "Números 1-10"
+    },
+    alfabeto: {
+      url: "https://teachablemachine.withgoogle.com/models/ccoYXWgaQ/",
+      name: "Alfabeto A-Z"
+    }
   };
 
-  const loadModel = async () => {
+  const videoConstraints = {
+    width: 640,
+    height: 480,
+    facingMode: "user",
+    frameRate: 24,
+    advanced: [
+      {
+        focusMode: "continuous"
+      },
+      {
+        whiteBalanceMode: "continuous"
+      },
+      {
+        exposureMode: "continuous"
+      }
+    ]
+  };
+
+  const speakText = useCallback((text) => {
+    if (!text) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "es-ES";
+    window.speechSynthesis.speak(utterance);
+  }, []);
+
+  const cleanupResources = useCallback(() => {
+    if (tensorRef.current) {
+      tensorRef.current.dispose();
+      tensorRef.current = null;
+    }
+    if (modelRef.current) {
+      modelRef.current.dispose();
+      modelRef.current = null;
+    }
+  }, []);
+
+  const loadModel = useCallback(async (modelType) => {
+    if (isModelLoading) return;
+
+    setIsModelLoading(true);
+    setText("");
+    setConfidence(0);
+
     try {
-      console.log("Iniciando carga del modelo...");
-
-      // 1. Solicitar datos del modelo desde la API
-      const response = await fetch(`${API_URL}/modelo`);
-      if (!response.ok) {
-        throw new Error(`Error al obtener datos del modelo: ${response.statusText}`);
+      // Limpiar el modelo anterior si existe
+      if (modelRef.current) {
+        modelRef.current.dispose();
+        modelRef.current = null;
       }
 
-      const modeloData = await response.json();
-      if (!modeloData || modeloData.length === 0) {
-        throw new Error("No se encontraron datos del modelo en la API");
-      }
+      const modelUrl = MODELS[modelType].url + "model.json";
+      const metadataUrl = MODELS[modelType].url + "metadata.json";
 
-      // 2. Obtener URLs de los archivos necesarios
-      const modeloInfo = modeloData[0]; // Cambia el índice a 1 para acceder al segundo modelo
-      const { model_file, weights_file, metadata_file } = modeloInfo;
+      console.log(`Cargando modelo ${MODELS[modelType].name}...`);
 
-      console.log("URLs recibidas:", { model_file, weights_file, metadata_file });
+      // Cargar modelo y metadata en paralelo
+      const [loadedModel, metadataResponse] = await Promise.all([
+        tf.loadLayersModel(modelUrl),
+        fetch(metadataUrl)
+      ]);
 
-      // 3. Verificar accesibilidad de los archivos
-      const checkFileAccessibility = async (url, fileType) => {
-        const res = await fetch(url);
-        if (!res.ok) {
-          throw new Error(`No se pudo acceder al archivo ${fileType}: ${res.statusText}`);
-        }
-        console.log(`Archivo ${fileType} accesible`);
-        return res;
-      };
-
-      await checkFileAccessibility(model_file, "model_file");
-      await checkFileAccessibility(weights_file, "weights_file");
-      await checkFileAccessibility(metadata_file, "metadata_file");
-
-      // 4. Extraer el prefijo de la ruta para los pesos
-      const weightPathPrefix = weights_file.substring(0, weights_file.lastIndexOf("/") + 1);
-      console.log("Prefijo para los pesos:", weightPathPrefix);
-
-      // 5. Cargar el modelo usando TensorFlow.js
-      const loadedModel = await tf.loadLayersModel(model_file, {
-        weightPathPrefix, // Usar prefijo para evitar problemas con las rutas
-      });
-
-      console.log("Modelo cargado exitosamente:", loadedModel.summary());
-
-      // 6. Cargar el archivo de metadata
-      const metadataResponse = await fetch(metadata_file);
-      if (!metadataResponse.ok) {
-        throw new Error(`No se pudo acceder al archivo metadata: ${metadataResponse.statusText}`);
-      }
       const metadata = await metadataResponse.json();
 
-      if (!metadata || !metadata.labels) {
-        throw new Error("El archivo de metadata no tiene el formato esperado");
-      }
-      console.log("Metadata cargada:", metadata);
-
-      // 7. Verificar si el modelo es para poses basado en 'packageName'
-      const isPose = metadata.packageName === "@teachablemachine/pose";  // Verificar si es un modelo de poses
-      setIsPoseModel(isPose);
-
-      // 8. Guardar modelo y etiquetas en el estado
-      setModel(loadedModel);
+      modelRef.current = loadedModel;
       setLabelEncoder(metadata.labels);
-      console.log("Modelo y etiquetas cargados exitosamente");
+
+      console.log("Modelo cargado correctamente:", modelType);
     } catch (error) {
-      console.error("Error detallado:", {
-        message: error.message,
-        stack: error.stack,
+      console.error("Error al cargar el modelo:", error);
+      cleanupResources();
+    } finally {
+      setIsModelLoading(false);
+    }
+  }, [cleanupResources]);
+
+  const changeModel = useCallback(async (newModelType) => {
+    if (isModelLoading || newModelType === activeModel) return;
+
+    setActiveModel(newModelType);
+    await loadModel(newModelType);
+  }, [isModelLoading, activeModel, loadModel]);
+
+  const preprocessImage = useCallback((image) => {
+    return tf.tidy(() => {
+      const frame = tf.browser.fromPixels(image);
+      const resized = tf.image.resizeBilinear(frame, [224, 224]);
+      const normalized = resized.toFloat().div(tf.scalar(127.5)).sub(tf.scalar(1));
+      return normalized.expandDims(0);
+    });
+  }, []);
+
+  const detectSignLanguage = useCallback(async () => {
+    if (!modelRef.current || !labelEncoder || !webcamRef.current || isProcessing) return;
+
+    const now = Date.now();
+    if (now - lastPredictionTimeRef.current < PREDICTION_INTERVAL) return;
+
+    setIsProcessing(true);
+    lastPredictionTimeRef.current = now;
+
+    try {
+      const imageSrc = webcamRef.current.getScreenshot();
+      if (!imageSrc) return;
+
+      const img = new Image();
+      img.src = imageSrc;
+      await new Promise((resolve) => {
+        img.onload = resolve;
       });
-    }
-  };
 
-  const activarCamara = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-    } catch (error) {
-      console.error("Error al activar la cámara: ", error);
-      alert("No se pudo activar la cámara.");
-    }
-  };
+      // Recortar la región de interés (ROI)
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = 224; // Tamaño esperado por el modelo
+      canvas.height = 224;
+      ctx.drawImage(img, 0, 0, 224, 224);
 
-  const detectSignLanguage = async () => {
-    if (!model || !labelEncoder || !videoRef.current || !canvasRef.current) return;
+      // Preprocesar la imagen
+      const tensor = preprocessImage(canvas);
+      const predictions = await modelRef.current.predict(tensor);
+      const predictionsArray = await predictions.data();
 
-    try {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
+      tensor.dispose();
+      predictions.dispose();
 
-      // Verificar que el video esté reproduciendo
-      if (video.readyState !== video.HAVE_ENOUGH_DATA) {
-        return;
-      }
-
-      ctx.drawImage(video,
-        video.videoWidth * 0.25,
-        video.videoHeight * 0.2,
-        video.videoWidth * 0.5,
-        video.videoHeight * 0.6,
-        0, 0, canvas.width, canvas.height
-      );
-
-      let frame = null;
-      let processedFrame = null;
-      let prediction = null;
-
-      try {
-        frame = tf.browser.fromPixels(canvas);
-
-        // Usar la resolución adecuada según el tipo de modelo (letras o poses)
-        if (isPoseModel) {
-          processedFrame = frame
-            .resizeBilinear([257, 257])  // Resolución para poses
-            .expandDims(0)
-            .toFloat()
-            .div(tf.scalar(255))
-            .sub(tf.scalar(0.5))
-            .div(tf.scalar(0.5));
-        } else {
-          processedFrame = frame
-            .resizeBilinear([224, 224])  // Resolución para letras
-            .expandDims(0)
-            .toFloat()
-            .div(tf.scalar(255))
-            .sub(tf.scalar(0.5))
-            .div(tf.scalar(0.5));
+      // Filtrar predicciones con baja confianza
+      const maxProb = Math.max(...predictionsArray);
+      if (maxProb > CONFIDENCE_THRESHOLD) {
+        const maxIndex = predictionsArray.indexOf(maxProb);
+        const predictedClass = labelEncoder[maxIndex];
+        if (predictedClass !== text) {
+          setText(predictedClass);
+          setConfidence(maxProb * 100);
+          speakText(predictedClass);
         }
-
-        prediction = model.predict(processedFrame);
-        const predictedClassIndex = prediction.argMax(1).dataSync()[0];
-        const predictedClass = labelEncoder[predictedClassIndex];
-
-        setPredictions(prev => {
-          const newPredictions = [...prev, predictedClass];
-          if (newPredictions.length > 5) newPredictions.shift();
-
-          const mostFrequent = newPredictions.reduce((a, b) =>
-            newPredictions.filter(v => v === a).length >= newPredictions.filter(v => v === b).length ? a : b
-          );
-
-          if (mostFrequent !== text) {
-            setText(mostFrequent);
-            speakText(mostFrequent);
-            console.log('Predicción:', mostFrequent);
-          }
-
-          return newPredictions;
-        });
-      } finally {
-        // Limpiar recursos de TensorFlow
-        if (frame) frame.dispose();
-        if (processedFrame) processedFrame.dispose();
-        if (prediction) prediction.dispose();
       }
     } catch (error) {
-      console.error('Error en la detección:', error);
+      console.error("Error en la detección:", error);
+    } finally {
+      setIsProcessing(false);
     }
-  };
+  }, [labelEncoder, text, preprocessImage, speakText, isProcessing]);
 
-  // Efecto para cargar el modelo y activar la cámara
+  // Efecto para cargar el modelo inicial
   useEffect(() => {
-    loadModel();
-    activarCamara();
+    loadModel(activeModel);
 
-    // Cleanup function
+    // Limpieza al desmontar el componente
     return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const tracks = videoRef.current.srcObject.getTracks();
-        tracks.forEach(track => track.stop());
-      }
+      cleanupResources();
     };
-  }, []); // Solo se ejecuta al montar el componente
+  }, [activeModel, loadModel, cleanupResources]);
 
   // Efecto para la detección continua
   useEffect(() => {
-    if (!model || !labelEncoder) return;
+    let intervalId;
 
-    const intervalId = setInterval(detectSignLanguage, 100);
-    return () => clearInterval(intervalId);
-  }, [model, labelEncoder, text]); // Dependencias actualizadas
+    if (modelRef.current && labelEncoder && !isModelLoading) {
+      intervalId = setInterval(detectSignLanguage, PREDICTION_INTERVAL);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [detectSignLanguage, isModelLoading, labelEncoder]);
 
   return (
-    <div style={styles.container}>
-      <div style={styles.cameraContainer}>
-        <video ref={videoRef} autoPlay muted playsInline style={styles.video} />
-        {/* Establecer dinámicamente el tamaño del canvas según el modelo */}
-        <canvas
-          ref={canvasRef}
-          style={styles.canvas}
-          width={isPoseModel ? 257 : 224}  // Cambiar a 257 si es modelo de poses, 224 si es modelo de imágenes
-          height={isPoseModel ? 257 : 224} // Lo mismo para la altura
-        />
+    <div className="flex flex-col items-center gap-6 p-4 bg-gray-100 w-full h-full overflow-y-auto">
+      <div className="flex gap-4 w-full max-w-2xl mx-auto">
+        <button
+          onClick={() => changeModel('alfabeto')}
+          disabled={isModelLoading}
+          className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-colors ${
+            activeModel === 'alfabeto'
+              ? 'bg-blue-600 text-white'
+              : 'bg-white text-gray-700 hover:bg-blue-50'
+          } ${isModelLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          Alfabeto A-Z
+        </button>
+        <button
+          onClick={() => changeModel('numeros')}
+          disabled={isModelLoading}
+          className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-colors ${
+            activeModel === 'numeros'
+              ? 'bg-blue-600 text-white'
+              : 'bg-white text-gray-700 hover:bg-blue-50'
+          } ${isModelLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          Números 1-10
+        </button>
       </div>
 
-      <div style={styles.textareaContainer}>
-        <textarea
-          value={text}
-          placeholder="Mostrar aquí..."
-          style={styles.textarea}
-          readOnly
-        />
+      {/* Contenedor principal para cámara y predicciones */}
+      <div className="flex flex-row gap-6 w-full max-w-5xl mx-auto">
+        {/* Sección de predicciones (izquierda, menos espacio) */}
+        <div className="flex-1 bg-white rounded-lg shadow-lg p-6">
+          <div className="text-center space-y-4">
+            <div className="text-3xl font-bold text-gray-800">
+              {text || `Esperando señas de ${MODELS[activeModel].name}...`}
+            </div>
+
+            {text && (
+              <div className="flex items-center justify-center gap-4">
+                <div className="text-xl text-gray-600">
+                  Confianza: {confidence.toFixed(1)}%
+                </div>
+                <div className="w-full h-4 bg-gray-200 rounded-full">
+                  <div
+                    className="h-full bg-blue-600 rounded-full transition-all duration-300"
+                    style={{ width: `${confidence}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Sección de la cámara (derecha, más espacio) */}
+        <div className="flex-2 relative">
+          <Webcam
+            ref={webcamRef}
+            screenshotFormat="image/jpeg"
+            videoConstraints={videoConstraints}
+            className="rounded-lg shadow-lg w-full"
+            style={{
+              minHeight: "480px", // Aumentar el alto de la cámara
+              objectFit: "cover",
+              backgroundColor: "black"
+            }}
+            audio={false}
+            mirrored={true}
+          />
+        </div>
       </div>
+
+      {isModelLoading && (
+        <div className="text-2xl font-bold text-center p-6 bg-white rounded-lg shadow-lg w-full max-w-2xl mx-auto">
+          Cargando modelo {MODELS[activeModel].name}...
+        </div>
+      )}
     </div>
   );
-};
-
-const styles = {
-  container: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "20px",
-    gap: "20px"
-  },
-  cameraContainer: {
-    width: "80%",
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  video: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-    borderRadius: '8px',
-  },
-  canvas: {
-    display: 'none',
-  },
-  textareaContainer: {
-    width: '20%',
-  },
-  textarea: {
-    width: '100%',
-    height: '300px',
-    padding: '10px',
-    fontSize: '35px',
-    borderRadius: '8px',
-    border: '1px solid #ccc',
-  },
 };
 
 export default CameraComponent;
