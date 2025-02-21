@@ -5,7 +5,7 @@ import Features from "../components/Features";
 import Video from "../components/Video";
 import Testimonials from "../components/Testimonials";
 import Contact from "../components/Contact";
-
+import RollingGallery from '../components/MultiCarousel/RollingGallery'
 
 export default function Home() {
     return (
@@ -14,6 +14,7 @@ export default function Home() {
             <Hero />
             <Features />
             <Video />
+            <RollingGallery autoplay={true} pauseOnHover={true} />
             <Testimonials />
             <Contact />
         </>

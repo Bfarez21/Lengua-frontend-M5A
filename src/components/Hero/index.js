@@ -26,7 +26,7 @@ const Hero = () => {
       // Si está autenticado, navegar a la cámara
       navigate("/camaraDetecter");
       console.log("Cámara activada");
-      alert("Cámara activada");
+      //alert("Cámara activada");
     }
   };
 
