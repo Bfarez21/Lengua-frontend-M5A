@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../firebase/AuthContext";
+import BlurText from "./BlurText";
  // Importar el contexto de autenticación
 
 const Hero = () => {
@@ -41,17 +42,21 @@ const Hero = () => {
             {/* Sección de texto */}
             <div className="w-full md:w-1/2 px-4 text-center md:text-center">
               <div className="max-w-[800px]">
-                <h1
-                  className="text-5xl md:text-6xl lg:text-7xl text-center font-extrabold leading-tight text-dark dark:text-blue-500  mb-10">
-                  <span className="block">HablaSeñas AI</span>
-                </h1>
+                <BlurText
+                  text="HablaSeñas AI"
+                  delay={150}
+                  animateBy="words"
+                  direction="top"
+                  //onAnimationComplete={() => console.log('Animation completed!')}
+                  className=" text-[clamp(2rem,8vw,5rem)] text-9xl md:text-9xl lg:text-[5rem] text-center font-extrabold leading-tight text-dark dark:text-blue-500 mb-10"
+                />
                 <p
                   className="mb-12 text-base leading-relaxed text-body-color dark:text-body-color-dark sm:text-lg md:text-xl">
-                  En SignSpeak AI, nos dedicamos a romper barreras de comunicación para construir un mundo más
+                  En HablaSeñas AI, nos dedicamos a romper barreras de comunicación para construir un mundo más
                   inclusivo. Nuestro principal propósito es conectar a personas sordas con personas oyentes que no
                   conocen el lenguaje de señas, utilizando tecnología avanzada basada en inteligencia artificial.
                 </p>
-                <div className="flex flex-wrap justify-center md:justify-center space-x-3 items-center">
+                <div className="flex flex-wrap justify-center gap-4">
                   <Link
                     to="/categoria"
                     className="rounded-2xl bg-black px-8 py-4 text-base font-semibold text-white duration-300 ease-in-out hover:bg-primary/80"
