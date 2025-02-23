@@ -23,7 +23,7 @@ const Somos = () => {
             <p
               className="mb-12 text-base !leading-relaxed text-body-color dark:text-body-color-dark sm:text-lg md:text-xl">
 
-              En SignSpeak AI, creemos en la igualdad de oportunidades y en el poder de la tecnología
+              En HablaSeñas AI, creemos en la igualdad de oportunidades y en el poder de la tecnología
               para derribar límites. Trabajamos con pasión e innovación para crear soluciones que transformen
               vidas y promuevan una sociedad más equitativa.
             </p>
