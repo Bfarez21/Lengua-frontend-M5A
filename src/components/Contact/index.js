@@ -25,6 +25,12 @@ const Contact = () => {
         }));
     };
 
+    useEffect(() => {
+        if (user?.email) {
+            setFormData(prev => ({ ...prev, email: user.email }));
+        }
+    }, [user]);
+
     const handleSubmit = async (e) => {
 
         if (!user) {
@@ -69,7 +75,7 @@ const Contact = () => {
             }
 
             setSuccess(true);
-            setFormData({ email: '', message: '' });
+            setFormData({ email: user?.email || "", message: '' });
         } catch (err) {
             setError('Hubo un error al enviar el mensaje. Por favor, intente nuevamente.');
             console.error('Error:', err);
@@ -93,6 +99,7 @@ const Contact = () => {
                         const userData = await response.json();
                         setUserId(userData.id);
                         console.log("ID USUARIO: " + userData.id);
+                        console.log("usuario" , user.email)
                     }
                 } catch (error) {
                     console.error("Error al obtener el ID del usuario:", error);
@@ -136,6 +143,7 @@ const Contact = () => {
                                                 value={formData.email}
                                                 onChange={handleChange}
                                                 placeholder="Ingresa tu email"
+                                                disabled
                                                 className="border-stroke w-full rounded-2xl border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
                                             />
                                         </div>
