@@ -17,6 +17,7 @@ import CameraComponentPoses from "./components/camera/CameraComponentPose";
 import { AuthProvider } from "./firebase/AuthContext";
 import PerfilUsuario from "./app/perfil/PerfilUsuario";
 import ProtectedRoute from "./firebase/ProtectedRoute";
+import Contact from "./components/Contact";
 
 
 // Crear el contexto del tema
@@ -70,7 +71,7 @@ const App = () => {
           {/* Rutas públicas sin protección */}
           <Route path="/" element={<RootLayout><Home /></RootLayout>} />
           <Route path="/somos" element={<RootLayout><Somos /></RootLayout>} />
-          <Route path="/contact" element={<RootLayout><ContactPage /></RootLayout>} />
+          <Route path="/contact" element={<RootLayout><Contact /></RootLayout>} />
           <Route path="/comentarios" element={<RootLayout><Testimonials /></RootLayout>} />
           <Route path="/signin" element={<RootLayout><SigninPage /></RootLayout>} />
 

@@ -116,7 +116,9 @@ const Contact = () => {
                                 ¿Necesita ayuda?
                             </h2>
                             <p className="mb-12 text-base font-medium text-body-color">
-                                Nuestro equipo de soporte se pondrá en contacto con usted lo antes posible por correo electrónico.
+                                Si tienes alguna pregunta, comentario o sugerencia, no dudes en
+                                escribirnos. Estamos aquí para ayudarte y brindarte toda la
+                                información que necesites.
                             </p>
                             <form onSubmit={handleSubmit}>
                                 <div className="-mx-4 flex flex-wrap">

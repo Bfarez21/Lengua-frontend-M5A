@@ -213,21 +213,22 @@ const Footer = () => {
                     <div className="h-px w-full bg-gradient-to-r from-transparent via-[#D2D8E183] to-transparent dark:via-[#959CB183]"></div>
                     <div className="py-8">
                         <p className="text-center text-base text-body-color dark:text-white">
-                           @Desarrollo De Software By{" "}
+                           @Desarrollo De Software
+                            Copyright© {" "}
                             <a
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="hover:text-primary"
                             >
-                                Erick, Bryan, Isaac, Miguel,
+                                HablaSeñas AI
                             </a>{" "}
-                            and{" "}
+                            By {" "}
                             <a
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="hover:text-primary"
                             >
-                                Edwin
+                                Erick, Bryan, Isaac, Miguel, Edwin
                             </a>
                         </p>
                     </div>
