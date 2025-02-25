@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { API_URL } from "../../config";
 import ServicioJuegos from "../../services/ServicioJuegos";
+import Swal from "sweetalert2";
 
 const IntermediateLevel = () => {
   const [senaActual, setSenaActual] = useState(null);
@@ -17,10 +18,17 @@ const IntermediateLevel = () => {
 
   useEffect(() => {
     obtenerSenas(categoriaActual);
+
   }, [categoriaActual]);
 
   useEffect(() => {
     if (senas.length > 0) {
+      Swal.fire({
+        title: "¡Bienvenido!",
+        text: "¡Tienes 2 intentos! Si fallas 2 veces, el juego finalizará.",
+        icon: "info",
+        confirmButtonText: "¡Entendido!"
+      });
       seleccionarSenaAleatoria();
     }
   }, [senas]);

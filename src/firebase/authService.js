@@ -82,7 +82,7 @@ const loginWithGoogle = async () => {
       Swal.fire({
         icon: "error",
         title: "Error al Iniciar Sesión",
-        text: error.message,
+        text: "Revise su conexión a internet",
         confirmButtonText: "Intentar de nuevo"
       });
     }

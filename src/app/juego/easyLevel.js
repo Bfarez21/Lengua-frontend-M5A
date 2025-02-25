@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { API_URL } from "../../config";
 import ServicioJuegos from "../../services/ServicioJuegos";
+import Swal from "sweetalert2";
 
 const NivelFacil = () => {
   const [senaActual, setSenaActual] = useState(null);
@@ -24,6 +25,12 @@ const NivelFacil = () => {
   // Efecto para inicializar el juego cuando se cargan las señas
   useEffect(() => {
     if (senas.length > 0) {
+      Swal.fire({
+        title: "¡Bienvenido!",
+        text: "¡Tienes 2 intentos! Si fallas 2 veces, el juego finalizará.",
+        icon: "info",
+        confirmButtonText: "¡Entendido!"
+      });
       seleccionarSenaAleatoria();
     }
   }, [senas]);

@@ -166,7 +166,7 @@ const PerfilUsuario = () => {
 
           <div className="w-full lg:w-9/12 px-6">
             <div className="bg-white px-8 py-11 shadow-three dark:bg-gray-dark">
-              <h6 className="font-semibold text-lg mb-4">Puntos Acumulados por Nivel</h6>
+              <h6 className="font-semibold text-lg mb-4">Tabla de resultados</h6>
               {chartData ? (
                 <div style={{ height: "300px" }}>
                   <canvas ref={chartRef}></canvas>
