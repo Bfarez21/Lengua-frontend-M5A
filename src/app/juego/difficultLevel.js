@@ -51,17 +51,20 @@ const DifficultLevel = () => {
           Juego Nivel Difícil
         </h1>
         <p className="text-center mb-6 text-lg">
-          Observa la seña y reprodúcela frente a la cámara.
+          Aprende Lengua de Señas de forma interactiva.
+          Practica y perfecciona tus habilidades realizando las señas correctas,
+          mientras el sistema evalúa tu precisión en tiempo real.
+          ¡Diviértete y mejora tu comprensión de la Lengua de Señas!
         </p>
 
-        <div className="flex justify-center items-center space-x-8">
-          {/* GIF Actual en la izquierda */}
-          {currentGif && (
-            <div className="text-center">
-              <img src={currentGif.image} alt={currentGif.greeting} className="w-80 h-80 mx-auto rounded-lg" />
-              <p className="mt-2 text-lg">{currentGif.greeting}</p>
-            </div>
-          )}
+        <div className="flex justify-center items-center space-x-6">
+          {/*/!* GIF Actual en la izquierda *!/*/}
+          {/*{currentGif && (*/}
+          {/*  <div className="text-center">*/}
+          {/*    <img src={currentGif.image} alt={currentGif.greeting} className="w-80 h-80 mx-auto rounded-lg" />*/}
+          {/*    <p className="mt-2 text-lg">{currentGif.greeting}</p>*/}
+          {/*  </div>*/}
+          {/*)}*/}
 
           {/* Cámara en la derecha */}
           <CameraComponentPoses />

@@ -19,8 +19,8 @@ const CameraComponent = () => {
 
   const MODELS = {
     numeros: {
-      url: "https://teachablemachine.withgoogle.com/models/bFBi4-0fM/",
-      name: "Números 1-10"
+      url: "https://teachablemachine.withgoogle.com/models/sSSU_GtaD/",
+      name: "Números 0-10"
     },
     alfabeto: {
       url: "https://teachablemachine.withgoogle.com/models/ccoYXWgaQ/",
@@ -219,7 +219,7 @@ const CameraComponent = () => {
               : 'bg-white text-gray-700 hover:bg-blue-50'
           } ${isModelLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          Números 1-10
+          Números 0-10
         </button>
       </div>
 
