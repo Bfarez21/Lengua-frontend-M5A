@@ -56,6 +56,13 @@ const CameraComponentPoses = () => {
   const PREDICTION_INTERVAL = 1000;
   const CONFIDENCE_THRESHOLD = 0.85;
 
+  // audio
+  const speakText = useCallback((text) => {
+    if (!text) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "es-ES"; // Configura el idioma a español
+    window.speechSynthesis.speak(utterance);
+  }, []);
 
   // Iniciar el juego
   const startGame = () => {
@@ -64,6 +71,8 @@ const CameraComponentPoses = () => {
     setTimeLeft(30);
     setGameHistory([]);
     selectRandomWord();
+    // Pronunciar la palabra actual al iniciar el juego
+    speakText(currentWord);
 
     // Iniciar el temporizador
     if (timerRef.current) clearInterval(timerRef.current);
@@ -80,21 +89,26 @@ const CameraComponentPoses = () => {
   };
 
   // Seleccionar una palabra aleatoria
-  const selectRandomWord = () => {
+  const selectRandomWord = useCallback(() => {
     const randomIndex = Math.floor(Math.random() * PALABRAS_JUEGO.length);
+    const newWord = PALABRAS_JUEGO[randomIndex];
     setCurrentWord(PALABRAS_JUEGO[randomIndex]);
-  };
+    // Pronunciar la nueva palabra seleccionada
+    speakText(newWord);
+  }, [speakText]);
 
   // Verificar si la detección coincide con la palabra actual
   useEffect(() => {
     if (gameActive && currentDetection.toLowerCase() === currentWord.toLowerCase() && confidence > CONFIDENCE_THRESHOLD * 100) {
+      // Pronunciar la palabra detectada
+      speakText(currentDetection);
       // Acierto
 
       setScore(prev => prev + Math.floor(confidence));
       setGameHistory(prev => [...prev, { word: currentWord, success: true }]);
       selectRandomWord();
     }
-  }, [currentDetection, gameActive, currentWord, confidence]);
+  }, [currentDetection, gameActive, currentWord, confidence,speakText]);
 
   const loadModel = async (modelType) => {
     setIsLoading(true);
