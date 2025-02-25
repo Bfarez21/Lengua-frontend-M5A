@@ -92,7 +92,7 @@ const Hero = () => {
             <div className="w-full md:w-1/2 px-4 flex justify-center">
               <div className="max-w-[400px] md:max-w-[800px]">
                 <img
-                  src="/images/logo/img-apl001.png"
+                  src="/images/img-aplii01.png"
                   alt="logo"
                   className="w-full"
                   width={140}

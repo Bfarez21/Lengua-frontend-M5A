@@ -18,6 +18,7 @@ import { AuthProvider } from "./firebase/AuthContext";
 import PerfilUsuario from "./app/perfil/PerfilUsuario";
 import ProtectedRoute from "./firebase/ProtectedRoute";
 import Contact from "./components/Contact";
+import PrivacyPolicy from "./components/Contact/PrivacyPolicy";
 
 
 // Crear el contexto del tema
@@ -74,6 +75,7 @@ const App = () => {
           <Route path="/contact" element={<RootLayout><Contact /></RootLayout>} />
           <Route path="/comentarios" element={<RootLayout><Testimonials /></RootLayout>} />
           <Route path="/signin" element={<RootLayout><SigninPage /></RootLayout>} />
+          <Route path="/privacypolicy" element={<RootLayout><PrivacyPolicy /></RootLayout>} />
 
           {/* Rutas protegidas para que no accedan desde el navegador con la url*/}
           <Route path="/camaraDetecter" element={<ProtectedRoute><RootLayout><CameraDetecter /></RootLayout></ProtectedRoute>} />

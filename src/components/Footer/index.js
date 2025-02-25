@@ -9,7 +9,7 @@ const Footer = () => {
                     <div className="-mx-4 flex flex-wrap">
                         <div className="w-full px-4 md:w-1/2 lg:w-4/12 xl:w-5/12">
                             <div className="mb-12 max-w-[360px] lg:mb-16">
-                                <Link href="/" className="mb-8 inline-block">
+                                <Link to="/" className="mb-8 inline-block">
                                     <img
                                         src="/images/logo/Log01-img.png"
                                         alt="logo"
@@ -157,7 +157,7 @@ const Footer = () => {
                                     {/*</li>*/}
                                     <li>
                                         <Link
-                                            href="/"
+                                            to="/privacypolicy"
                                             className="mb-4 inline-block text-base text-body-color duration-300 hover:text-primary dark:text-body-color-dark dark:hover:text-primary"
                                         >
                                             Privacy Policy
@@ -183,7 +183,7 @@ const Footer = () => {
                                 <ul>
                                     <li>
                                         <Link
-                                            href="/contact"
+                                            to="/contact"
                                             className="mb-4 inline-block text-base text-body-color duration-300 hover:text-primary dark:text-body-color-dark dark:hover:text-primary"
                                         >
                                             Soporte
