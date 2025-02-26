@@ -7,7 +7,7 @@
     "@emotion/styled": "^11.14.0",
     "@mediapipe/camera_utils": "^0.3.1675466862",
     "@mediapipe/drawing_utils": "^0.3.1675466124",
-    "@mediapipe/hands": "^0.4.1646424915",
+    "@mediapipe/hands": "^0.4.1675469240",
     "@mui/icons-material": "^6.3.1",
     "@mui/material": "^6.4.1",
     "@react-spring/web": "^9.7.5",
