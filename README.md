@@ -50,7 +50,7 @@ Además del módulo de traducción, la plataforma integra áreas de enseñanza i
 
 | Módulo de Aprendizaje de Señas | Área de Enseñanza de Señas |
 | :---: | :---: |
-| ![Traductor Señas](./screenshots/03-enseñanza-avatar.jpeg) | ![Enseñanza Señas](./screenshots/04-ensenanza-avatar.jpeg) |
+| ![Traductor Señas](./screenshots/03-ensenanza-avatar.jpeg) | ![Enseñanza Señas](./screenshots/04-ensenanza-avatar.jpeg) |
 
 | Área de Enseñanza con Avatar Virtual |
 | :---: |
