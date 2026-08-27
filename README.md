@@ -1,70 +1,61 @@
-# Getting Started with Create React App
+# 💻 SignSpeak AI - Web Application & Educational Portal
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](#)
+[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](#)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](#)
+[![Firebase](https://img.shields.io/badge/Firebase_Auth-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)](#)
 
-## Available Scripts
+## 📌 Descripción del Proyecto
 
-In the project directory, you can run:
+Aplicación web interactiva desarrollada en **React** como parte del ecosistema **SignSpeak AI**. Su objetivo principal es romper las barreras de comunicación entre personas sordas y oyentes, permitiendo a los usuarios autenticados acceder al motor de Inteligencia Artificial para la traducción en tiempo real de Lenguaje de Señas a texto y audio mediante el uso de la webcam.
 
-### `npm start`
+Además del módulo de traducción, la plataforma integra áreas de enseñanza interactivas apoyadas por avatares virtuales para facilitar el aprendizaje intuitivo del lenguaje de señas.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🛠️ Tecnologías Utilizadas
 
-### `npm test`
+* **Librería Frontend:** React.js (JavaScript ES6+)
+* **Estilos & UI:** Tailwind CSS (Diseño moderno, accesible y responsivo)
+* **Autenticación & Seguridad:** Firebase Authentication (Gestión rápida y segura de usuarios)
+* **Procesamiento de Video & Cámara:** API MediaDevices / HTML5 Canvas para la transmisión de webcam al servidor de IA
+* **Peticiones HTTP:** Axios / Fetch API para consumo del backend central en Django
+* **Herramientas de Desarrollo:** Node.js, npm, Vite / Create React App
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## 🌐 Funcionalidades Principales
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+* **🔑 Autenticación Sencilla:** Registro e inicio de sesión ágil mediante Firebase Authentication.
+* **📹 Traducción en Tiempo Real (IA + Webcam):** Módulo de detección de gestos que transmite el flujo de la cámara web al servidor de IA en Django para retornar la interpretación en texto y audio instantáneamente.
+* **🎓 Áreas de Enseñanza & Aprendizaje:** Módulos didácticos asistidos por avatares virtuales para representar señas y promover la inclusión educativa.
+* **📱 Interfaz Moderna & Adaptativa:** Diseño estilizado con Tailwind CSS optimizado para escritorio y dispositivos móviles.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 👨‍💻 Mis Contribuciones
 
-### `npm run eject`
+* **🎨 Plantilla Base & Arquitectura:** Creación de la estructura base del proyecto en React, definiendo el flujo de componentes y la configuración inicial de estilos con Tailwind CSS.
+* **📹 Módulo de Detección con Webcam:** Desarrollo de la interfaz para la captura de video en vivo mediante la cámara web y su conexión con el modelo de IA.
+* **🔑 Integración de Autenticación:** Configuración del flujo de usuarios y acceso a rutas protegidas para la ejecución de la IA.
+* **📐 Ingeniería & Prototipado:** Co-diseño de las interfaces en Figma, diagramación UML de requerimientos y estructuración de la base de datos relacional.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+---
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 📸 Capturas de la Aplicación Web
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+| Autenticación & Acceso (Firebase) | Traducción con Webcam (IA) |
+| :---: | :---: |
+| ![Login Web](./screenshots/01-login-web.png) | ![Traducción Webcam](./screenshots/02-webcam-ia.png) |
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+| Módulo de Enseñanza con Avatar | Estilos & UI (Tailwind CSS) |
+| :---: | :---: |
+| ![Enseñanza Avatar](./screenshots/03-ensenanza-avatar.png) | ![UI Dashboard](./screenshots/04-dashboard-ui.png) |
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 🔗 Repositorios del Ecosistema SignSpeak AI
 
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+* ⚙️ **Backend API & IA (Python/Django):** [backend-LenguaSeniasM5A](https://github.com/Bfarez21/backend-LenguaSeniasM5A)
+* 💻 **Frontend Web (React):** [Lengua-frontend-M5A](https://github.com/Bfarez21/Lengua-frontend-M5A)
+* 📱 **App Móvil (Flutter):** [flutter_application_1](https://github.com/Bfarez21/flutter_application_1)
