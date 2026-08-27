@@ -44,15 +44,17 @@ Además del módulo de traducción, la plataforma integra áreas de enseñanza i
 
 ## 📸 Capturas de la Aplicación Web
 
-| Autenticación & Acceso  | Traducción con Webcam (IA) |
+| Landing Page / Home | Traducción con Webcam (IA en Vivo) |
 | :---: | :---: |
-| ![Login Web](./screenshots/01-login-web.png) | ![Traducción Webcam](./screenshots/02-webcam-ia.png) |
+| ![Home Web](./screenshots/01-home.png) | ![Traducción Webcam](./screenshots/02-webcam-ia.jpeg) |
 
-| Módulo de Enseñanza con Avatar | Estilos & UI (Tailwind CSS) |
+| Módulo de Aprendizaje de Señas | Área de Enseñanza de Señas |
 | :---: | :---: |
-| ![Enseñanza Avatar](./screenshots/03-ensenanza-avatar.png) | ![UI Dashboard](./screenshots/04-dashboard-ui.png) |
+| ![Traductor Señas](./screenshots/03-enseñanza-avatar.jpeg) | ![Enseñanza Señas](./screenshots/04-ensenanza-avatar.jpeg) |
 
----
+| Área de Enseñanza con Avatar Virtual |
+| :---: |
+| ![Enseñanza Avatar](./screenshots/05-ensenanza-avatar.jpeg) |
 
 ## 🔗 Repositorios del Ecosistema SignSpeak AI
 
