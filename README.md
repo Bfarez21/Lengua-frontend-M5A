@@ -44,7 +44,7 @@ Además del módulo de traducción, la plataforma integra áreas de enseñanza i
 
 ## 📸 Capturas de la Aplicación Web
 
-| Autenticación & Acceso (Firebase) | Traducción con Webcam (IA) |
+| Autenticación & Acceso  | Traducción con Webcam (IA) |
 | :---: | :---: |
 | ![Login Web](./screenshots/01-login-web.png) | ![Traducción Webcam](./screenshots/02-webcam-ia.png) |
 
